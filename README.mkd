@@ -1,32 +1,37 @@
-## Taboo
+## Taboo.vim
 
-Taboo is a simple plugin for easily cutomize how tabs are displayed and to rename them. 
-The project is still under heavy development and at the moment works only with vim running inside a terminal.
+Taboo is a simple plugin for easily cutomize and rename tabs. 
+This project is still under heavy development and at the moment **works only with vim running inside a terminal**.
 
 
 ### Installation
 
  Install into `.vim/plugin/taboo.vim` or better, use Pathogen.
 
- To ensure you will see the magic, be sure to insert this line in your `.vimrc` file:
+ To finish installation be sure to insert the following in your `.vimrc` file:
 
    `set tabline=%!TabooTabline()`
 
 
- This plugin does not set any mapping for you but it would be useful if you set the following mapping: `nnoremap <leader>: :call TabooRenamePrompt()<CR>` so that you can easily rename the current tab.
+ This plugin does not set any mapping for you but it would be useful if you set the following mapping: 
+ `nnoremap <leader>: :call TabooRenamePrompt()<CR>` 
+ so that you can easily rename the current tab.
 
 
 ### Usage
 
- * `:TabooRename` to rename the current tab
+ * `:TabooRename` to rename the label of current tab
+ * `:TabooReset` to reset the current tab label to its original name
 
- For other commands see `help: taboo.vim`
+ For other commands and informations type `help: taboo.vim`
 
 
 ### Available settings
 
  * `g:tab_persistent_label` controls the way a label remains attached to
  a specifi number of tab. 
- * `g:tab_type_path` controls the way  
+ * `g:tab_type_path` controls the way the tabs labels are displayed  
+ * `g:tab_display_tabnr`: controls the way tabs numbers are displayed 
+
  
- For other settings see `help: taboo.vim`
+ For other settings and informations type `help: taboo.vim`
