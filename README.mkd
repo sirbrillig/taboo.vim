@@ -1,8 +1,7 @@
 ## Taboo
 
-Taboo is a simple plugin for easily cutomize how tabs are displayed and to rename them.
-
-The project is still under heavy development and at the moment works only with console interface of vim.
+Taboo is a simple plugin for easily cutomize how tabs are displayed and to rename them. 
+The project is still under heavy development and at the moment works only with vim running inside a terminal.
 
 
 ### Installation
@@ -14,12 +13,7 @@ The project is still under heavy development and at the moment works only with c
    `set tabline=%!TabooTabline()`
 
 
- This plugin does not set any mapping for you but it would be useful if you
- set the following mapping:
-
- `nnoremap <leader>: :call TabooRenamePrompt()<CR>` 
-
- so that you can easily rename the current tab.
+ This plugin does not set any mapping for you but it would be useful if you set the following mapping: `nnoremap <leader>: :call TabooRenamePrompt()<CR>` so that you can easily rename the current tab.
 
 
 ### Usage
