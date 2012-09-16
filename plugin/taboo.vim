@@ -133,7 +133,7 @@ function! TabooTabline()
 
     " display he label for closing tabs
     if tabpagenr('$') > 1 && g:tab_display_close_label
-        let s .= '%=%#TabLine#%999' . g:tab_close_label
+        let s .= '%=%#TabLine#%999X' . g:tab_close_label
     endif
 
     return s
