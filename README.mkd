@@ -8,22 +8,23 @@ This project is still under heavy development and at the moment **works only wit
 
  Install into `.vim/plugin/taboo.vim` or better, use Pathogen.
 
- To finish installation be sure to insert the following in your `.vimrc` file:
+ To complete the installation be sure to add the following line to your `.vimrc` file:
 
    `set tabline=%!TabooTabline()`
 
 
- This plugin does not set any mapping for you but it would be useful if you set the following mapping: 
- `nnoremap <leader>: :call TabooRenamePrompt()<CR>` 
- so that you can easily rename the current tab.
+ This plugin does not set any mapping for you but it would be useful to set the following: 
+ 
+ * `nnoremap <leader>$ :TabooRenameTabPrompt<CR>`: easily rename the current tab.
 
 
 ### Usage
 
- * `:TabooRename` to rename the label of current tab
- * `:TabooReset` to reset the current tab label to its original name
+ * `:TabooRenameTabPrompt` to rename the label of current tab
+ * `:TabooOpenTabPrompt` to open a new tab with a custom name
+ * `:TabooResetTabName` to reset the current tab label to its original name
 
- For other commands and informations type `help: taboo.vim`
+ For other commands and informations type `:help taboo.vim`
 
 
 ### Available settings
@@ -34,4 +35,4 @@ This project is still under heavy development and at the moment **works only wit
  * `g:tab_display_tabnr`: controls the way tabs numbers are displayed 
 
  
- For other settings and informations type `help: taboo.vim`
+ For other settings and informations type `:help taboo.vim`
