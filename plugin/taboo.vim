@@ -3,7 +3,7 @@
 " Description: A little plugin for managing tabs in vim  
 " Mantainer: Giacomo Comitti <giacomit at gmail dot com>
 " Last Changed: 17 Sep 2012
-" Version: 0.0.2
+" Version: 0.0.1
 " =============================================================================
 
 " Init --------------------------- {{{
@@ -48,6 +48,9 @@ endif
 "
 "   flags:
 "   %m -> modified flag
+"   %b -> number of buffers opened in a tab
+"         (same as windows number)
+"
 
 if !exists("g:taboo_format")
     let g:taboo_format = "%N %f%m"
@@ -99,7 +102,7 @@ endfunction
 " }}}
 
 " parse_fmt_str ------------------ {{{
-" %s at the end of the string a and orphans %s such as the first % of '%%f'
+" %s at the end of the string a and orphan %s such as the first % of '%%f'
 " are ignored (FIX??)
 function! s:parse_fmt_str(str)
     let items = []
@@ -137,6 +140,8 @@ function! s:expand_fmt(tabnr, items)
                 let label .= s:expand_path(i, a:tabnr, buflist)
             elseif i == "%n" " note: == -> case insensitive comparison
                 let label .= s:expand_tab_number(i, a:tabnr, active_tabnr)
+            elseif i ==# "%b"
+                let label .= len(buflist)
             endif
         else
             let label .= i
@@ -191,7 +196,7 @@ function! s:expand_path(flag, tabnr, buflist)
         endif
 
         if empty(path)
-            let path = g:tab_unnamed_label
+            let path = g:taboo_unnamed_label
         endif
     else
         let path = label
@@ -204,7 +209,7 @@ endfunction
 " rename tab {{{
 function! s:RenameTab(label)
     call s:add_tab(tabpagenr(), a:label) " TODO: change the name in raname_tab ?
-    set showtabline=1 " refresh the tabline TODO: find a better solution
+    exec "set showtabline=" . &showtabline 
 endfunction
 
 function! s:RenameTabPrompt()
@@ -217,7 +222,7 @@ endfunction
 function! s:OpenNewTab(label)
     exec "w | tabe"
     call s:add_tab(tabpagenr(), a:label)
-    set showtabline=1 " refresh tabline. TODO: find a better solution
+    exec "set showtabline=" . &showtabline   " refresh the tabline TODO: find a better solution
 endfunction
 
 function! s:OpenNewTabPrompt()
@@ -230,7 +235,8 @@ endfunction
 function! s:ResetTabName()
     call s:remove_tab(tabpagenr())
     call s:add_tab(tabpagenr(), '')
-    set showtabline=1 " refresh tabline. TODO: find a better solution
+    exec "set showtabline=" . &showtabline   " refresh the tabline TODO: find a better solution
+    "set showtabline=1 " refresh tabline. TODO: find a better solution
 endfunction
 " }}}
 
@@ -296,7 +302,7 @@ command! -bang -nargs=0 TabooRenameTabPrompt call s:RenameTabPrompt()
 command! -bang -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
 command! -bang -nargs=0 TabooCloseTab call s:CloseTab()
 command! -bang -nargs=0 TabooResetTabName call s:ResetTabName()
-"command! -bang -nargs=0 Test echo s:tabs
+command! -bang -nargs=0 Test echo s:tabs
 
 augroup taboo
     au TabEnter * call s:update_tabs() 
