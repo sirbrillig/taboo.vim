@@ -82,10 +82,10 @@ function! TabooTabline()
     for i in range(1, tabpagenr('$'))
 
         let tab = get(s:tabs, i)
-        if tab[0]  " renamed
-            let label_items = s:parse_fmt_str(g:taboo_format_renamed)
-        else
+        if empty(tab)  " not renamed
             let label_items = s:parse_fmt_str(g:taboo_format)
+        else
+            let label_items = s:parse_fmt_str(g:taboo_format_renamed)
         endif
 
         let tabln .= s:expand_fmt(i, label_items)
@@ -203,7 +203,7 @@ endfunction
 
 " rename tab {{{
 function! s:RenameTab(label)
-    all s:add_tab(tabpagenr(), a:label) " TODO: change the name in raname_tab ?
+    call s:add_tab(tabpagenr(), a:label) " TODO: change the name in raname_tab ?
     set showtabline=1 " refresh the tabline TODO: find a better solution
 endfunction
 
