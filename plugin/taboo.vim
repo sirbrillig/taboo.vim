@@ -1,6 +1,6 @@
 " =============================================================================
 " File: taboo.vim
-" Description: A little plugin for customizing and renaming tabs  
+" Description: A little plugin for managing tabs in vim  
 " Mantainer: Giacomo Comitti <giacomit at gmail dot com>
 " Last Changed: 17 Sep 2012
 " Version: 0.0.2
@@ -17,8 +17,8 @@ let g:loaded_taboo = 1
 
 " Initialize variables ----------- {{{
 
-if !exists("s:tabs_register")
-    let s:tabs_register = {}
+if !exists("s:tabs")
+    let s:tabs = {}
 endif
 
 " used to split surrounding characters given in the same string
@@ -50,23 +50,19 @@ endif
 "   %m -> modified flag
 
 if !exists("g:taboo_format")
-    let g:taboo_format = "%f%m"
+    let g:taboo_format = "%N %f%m"
 endif
 
 if !exists("g:taboo_format_renamed")
-    let g:taboo_format_renamed = "[%f]%m"
+    let g:taboo_format_renamed = "%N [%f]%m"
 endif
 
 if !exists("g:taboo_modified_flag")
     let g:taboo_modified_flag= "*"
 endif    
 
- if !exists("g:taboo_display_close_label")
-    let g:taboo_display_close_label = 1
-endif 
-
 if !exists("g:taboo_close_label")
-    let g:taboo_close_label = 'x '
+    let g:taboo_close_label = ''
 endif    
 
 if !exists("g:taboo_unnamed_label")
@@ -80,25 +76,23 @@ endif
 " This function will be called inside the terminal
 
 function! TabooTabline()
-    call s:updateRegisteredTabs()
+    "call s:update_tabs()
 
     let tabln = ''
     for i in range(1, tabpagenr('$'))
 
-        let tab = get(s:tabs_register, i)
-        if tab == "0" " not renamed
-            let label_items = s:parse_fmt_str(g:taboo_format)
-        else
+        let tab = get(s:tabs, i)
+        if tab[0]  " renamed
             let label_items = s:parse_fmt_str(g:taboo_format_renamed)
+        else
+            let label_items = s:parse_fmt_str(g:taboo_format)
         endif
 
         let tabln .= s:expand_fmt(i, label_items)
     endfor
      
     let tabln .= '%#TabLineFill#'
-    if g:taboo_display_close_label
-        let tabln .= s:expand_close_label()
-    endif     
+    let tabln .= '%=%#TabLine#%999X' . g:taboo_close_label
 
     return tabln
 endfunction
@@ -157,7 +151,6 @@ endfunction
 
 " expand_tab_number -------------- {{{
 function! s:expand_tab_number(flag, tabnr, active_tabnr)
-    echom a:flag
     if a:flag ==# "%n" " ==# : case sensitive comparison
         return a:tabnr == a:active_tabnr ? a:tabnr : ''
     else
@@ -185,8 +178,8 @@ function! s:expand_path(flag, tabnr, buflist)
     let file_path = fnamemodify(bn, ':p:t')
     let abs_path = fnamemodify(bn, ':p:h')
 
-    let tab = get(s:tabs_register, a:tabnr)
-    if tab == "0" " not renamed
+    let label = get(s:tabs, a:tabnr)
+    if empty(label) " not renamed
         let path = ""
         if a:flag ==# "%f"
             let path = file_path
@@ -201,23 +194,16 @@ function! s:expand_path(flag, tabnr, buflist)
             let path = g:tab_unnamed_label
         endif
     else
-        let path = tab
+        let path = label
     endif
 
     return path
 endfunction
 " }}}
 
-" expand_close_label ------------- {{{
-function! s:expand_close_label()
-    if tabpagenr('$') > 1
-        return '%=%#TabLine#%999X' . g:taboo_close_label
-    endif                
-endfunction
-" }}}        
-
+" rename tab {{{
 function! s:RenameTab(label)
-    call s:register_curr_tab(a:label) " TODO: change the name in raname_tab ?
+    all s:add_tab(tabpagenr(), a:label) " TODO: change the name in raname_tab ?
     set showtabline=1 " refresh the tabline TODO: find a better solution
 endfunction
 
@@ -225,10 +211,12 @@ function! s:RenameTabPrompt()
     let label = s:strip(input("New label: "))
     call s:RenameTab(label)
 endfunction
+" }}}
 
+" open new tab {{{
 function! s:OpenNewTab(label)
     exec "w | tabe"
-    call s:register_curr_tab(a:label)
+    call s:add_tab(tabpagenr(), a:label)
     set showtabline=1 " refresh tabline. TODO: find a better solution
 endfunction
 
@@ -236,66 +224,82 @@ function! s:OpenNewTabPrompt()
     let label = s:strip(input("Tab label: "))
     call s:OpenNewTab(label)
 endfunction
+" }}}
 
+" reset tab name {{{
 function! s:ResetTabName()
-    let curr_tab = tabpagenr()
-    call s:unregister_tab(curr_tab)
+    call s:remove_tab(tabpagenr())
+    call s:add_tab(tabpagenr(), '')
     set showtabline=1 " refresh tabline. TODO: find a better solution
 endfunction
+" }}}
 
+" close tab {{{
 function! s:CloseTab()
-    " TODO
-    " this function must ensure that when i tab is closed
-    " all the registered tabs (renamed tabs) will gets updated properly
+    if len(s:tabs) > 1
+        call s:shift_to_left_tabs_from(tabpagenr()) 
+        exec "tabclose"
+    else
+        echo "Nothing to close!"
+    endif
 endfunction
+" }}}
 
-" mmh, TODO: revisit
-function! s:updateRegisteredTabs()
-    for i in keys(s:tabs_register)
-        if i > tabpagenr('$')
-            " the tab # i does not exist anymore: remove it
-            call s:unregister_tab(i)
-        endif
+" shift_to_left_tabs_from {{{
+function! s:shift_to_left_tabs_from(currtab)
+    let r_tabs = filter(keys(s:tabs), 'v:val > ' . a:currtab)
+    for i in r_tabs 
+        let t = get(s:tabs, i)
+        let s:tabs[i-1] = t
     endfor
+    call s:remove_tab(max(keys(s:tabs)))
 endfunction
+" }}}
+
+" update_tabs {{{
+function! s:update_tabs()
+    " register every tab when it is created
+    let t = get(s:tabs, tabpagenr(), "")
+    if empty(t)
+        call s:add_tab(tabpagenr(), '')
+    endif
+endfunction
+" }}}
 
 
-" operations on the tabs register
+" operations on the tabs register {{{
 " =============================================================================
 
-function! s:unregister_tab(tabnr)
-    unlet s:tabs_register[a:tabnr]
+function! s:remove_tab(tabnr)
+    unlet s:tabs[a:tabnr]
 endfunction
 
-function! s:register_tab(tabnr, label)
-    let s:tabs_register[a:tabnr] = a:label
+function! s:add_tab(tabnr, label)
+    let s:tabs[a:tabnr] = a:label
 endfunction
+                    
+" }}}
 
-function! s:register_curr_tab(label)
-    let curr_tab = tabpagenr()
-    call s:register_tab(curr_tab, a:label)
-endfunction
-
-
-" helper functions
+" helper functions {{{
 " =============================================================================
 
 function! s:strip(str)
     return substitute(a:str, '^\s*\(.\{-}\)\s*$', '\1', '')
 endfunction
 
+" }}}
+
 
 "command! -bang -nargs=1 TabooRenameTab call s:RenameTab(<q-args>)
 command! -bang -nargs=0 TabooRenameTabPrompt call s:RenameTabPrompt()
 "command! -bang -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
 command! -bang -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
+command! -bang -nargs=0 TabooCloseTab call s:CloseTab()
 command! -bang -nargs=0 TabooResetTabName call s:ResetTabName()
-"command! -bang -nargs=0 TabooCloseTab call s:CloseTab()
-command! -bang -nargs=1 TabooTest echo s:tabs_register
+"command! -bang -nargs=0 Test echo s:tabs
 
 augroup taboo
-    " TODO: use directly remove_tab_from_register ?
-    au TabLeave * call s:updateRegisteredTabs() 
+    au TabEnter * call s:update_tabs() 
 augroup END
 
 
