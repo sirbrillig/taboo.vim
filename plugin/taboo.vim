@@ -1,6 +1,6 @@
 " =============================================================================
 " File: taboo.vim
-" Description: A little plugin for customizing and renaming tabs. 
+" Description: A little plugin for customizing and renaming tabs  
 " Mantainer: Giacomo Comitti <giacomit at gmail dot com>
 " Last Changed: 16 Sep 2012
 " Version: 0.0.2
@@ -17,19 +17,13 @@ let g:loaded_taboo = 1
 
 " Initialize variables ----------- {{{
 
-if !exists("s:taboo_tabs_labels")
-    let s:taboo_tabs_labels = {}
+if !exists("s:tabs_register")
+    let s:tabs_register = {}
 endif
 
 " }}}
 
 " Initialize default settings ---- {{{
-
-" if the flag g:tab_persistent_label is set to true, a specific label remain
-" attached to a specific tab number.
-if !exists("g:tab_persistent_label")
-    let g:tab_persistent_label = 0
-endif
 
 " n -> do not display numbers
 " c -> display only current tab number
@@ -58,7 +52,7 @@ endif
 " r -> relative to home
 " a -> absolute path
 if !exists("g:tab_type_path")
-    let g:tab_type_path = 'r'
+    let g:tab_type_path = 'f'
 endif
 
 if !exists("g:tab_display_close_label")
@@ -73,6 +67,13 @@ if !exists("g:tab_unnamed_label")
     let g:tab_unnamed_label = '[no name]'
 endif    
 
+" TODO: keep?
+" if the flag g:tab_persistent_label is set to true, a specific label remain
+" attached to a specific tab number.
+if !exists("g:tab_persistent_label")
+    let g:tab_persistent_label = 0
+endif           
+
 " }}}
 
 
@@ -80,7 +81,7 @@ endif
 " This function will be called only from the terminal
 
 function! TabooTabline()
-    call s:updateRenamedTabs()
+    call s:updateRegisteredTabs()
     let s = ''
     for i in range(1, tabpagenr('$'))
 
@@ -102,7 +103,7 @@ function! TabooTabline()
         endif
 
         " display tab name
-        let name = get(s:taboo_tabs_labels, i)
+        let name = get(s:tabs_register, i)
         if name == "0" 
             " tab with no custom name
 
@@ -120,8 +121,7 @@ function! TabooTabline()
             endif
 
             if empty(path)
-                , let label .= g:tab_unnamed_label
-                continue
+                let label = g:tab_unnamed_label
             else                     
                 let label .= path
             endif
@@ -156,74 +156,103 @@ endfunction
 
 " }}}
 
-" RenameTab ---------------------- {{{
-
-function! s:RenameTab(label)
-    let tabnr = tabpagenr()        
-    let s:taboo_tabs_labels[tabnr] = s:strip(a:label)
-    " refresh the tabline FIX: I have to find a better solution
-    set showtabline=1
-endfunction
-
+" TabooGuiTabline ---------------- {{{
+" TODO
 " }}}
 
-" RenameTabPrompt ---------------- {{{
+
+function! s:RenameTab(label)
+    call s:register_curr_tab(a:label) " TODO: change the name in raname_tab ?
+    set showtabline=1 " refresh the tabline TODO: find a better solution
+endfunction
 
 function! s:RenameTabPrompt()
-    let label = input("New tab label: ")
+    let label = s:strip(input("New label: "))
     call s:RenameTab(label)
 endfunction
 
-" }}}
+function! s:OpenNewTab(label)
+    execute ":w"
+    execute ":tabe"
+    call s:register_curr_tab(a:label)
+    set showtabline=1 " refresh tabline. TODO: find a better solution
+endfunction
 
-" updateRenamedTabs -------------- {{{
+function! s:OpenNewTabPrompt()
+    let label = s:strip(input("Tab label: "))
+    call s:OpenNewTab(label)
+endfunction
 
-function! s:updateRenamedTabs()
+function! s:ResetTabName()
+    let curr_tab = tabpagenr()
+    call s:unregister_tab(curr_tab)
+    set showtabline=1 " refresh tabline. TODO: find a better solution
+endfunction
+
+function! s:CloseTab()
+    " TODO
+    " this function must ensure that when i tab is closed
+    " all the registered tabs (renamed tabs) will gets updated properly
+endfunction
+
+" mmh, TODO: revisit
+function! s:updateRegisteredTabs()
     if !g:tab_persistent_label
-        for i in keys(s:taboo_tabs_labels)
+        for i in keys(s:tabs_register)
             if i > tabpagenr('$')
                 " the tab # i does not exist anymore: remove it
-                unlet s:taboo_tabs_labels[i]
+                call s:unregister_tab(i)
             endif
         endfor
     endif
 endfunction
 
-" }}}
 
-" ResetTabName -------------- {{{
+" operations on the tabs register
+" =============================================================================
 
-function! s:ResetTabName()
-    unlet s:taboo_tabs_labels[tabpagenr()]    
-    set showtabline=1 " FIX: i have to find a better solution
+function! s:unregister_tab(tabnr)
+    unlet s:tabs_register[a:tabnr]
 endfunction
 
-" }}}
+" TODO this does the same thing as s:rename_tab() -> delete ?
+function! s:register_tab(tabnr, label)
+    let s:tabs_register[a:tabnr] = a:label
+endfunction
 
- " ToggleLabelPersistence --------- {{{
+function! s:register_curr_tab(label)
+    let curr_tab = tabpagenr()
+    call s:register_tab(curr_tab, a:label)
+endfunction
+
+
+" options toggling functions
+" =============================================================================
 
 function! s:ToggleLabelPersistence()
     let g:tab_persistent_label = !g:tab_persistent_label
 endfunction
 
-" }}}    
 
-" strip -------------------------- {{{
+" helper functions
+" =============================================================================
 
 function! s:strip(str)
     return substitute(a:str, '^\s*\(.\{-}\)\s*$', '\1', '')
 endfunction
 
-" }}}
 
-
-command! -bang -nargs=1 TabooRename call s:RenameTab(<q-args>)
-command! -bang -nargs=0 TabooRenamePrompt call s:RenameTabPrompt()
-command! -bang -nargs=0 TabooReset call s:ResetTabName()
-command! -bang -nargs=0 TabooTogglePersistence call s:ToggleLabelPersistence()
+"command! -bang -nargs=1 TabooRenameTab call s:RenameTab(<q-args>)
+command! -bang -nargs=0 TabooRenameTabPrompt call s:RenameTabPrompt()
+"command! -bang -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
+command! -bang -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
+command! -bang -nargs=0 TabooResetTabName call s:ResetTabName()
+"command! -bang -nargs=0 TabooCloseTab call s:CloseTab()
+"command! -bang -nargs=0 TabooTogglePersistence call s:ToggleLabelPersistence()
 
 augroup taboo
-    au TabLeave * call s:updateRenamedTabs() 
+    " TODO: use directly remove_tab_from_register ?
+    au TabLeave * call s:updateRegisteredTabs() 
 augroup END
 
 
