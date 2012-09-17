@@ -6,16 +6,20 @@ This project is still under heavy development and at the moment **works only wit
 
 ### Installation
 
- Install into `.vim/plugin/taboo.vim` or better, use Pathogen.
+Install into `.vim/plugin/taboo.vim` or better, use Pathogen.
 
- To complete the installation be sure to add the following line to your `.vimrc` file:
+To complete the installation be sure to add the following line to your `.vimrc` file:
 
-   `set tabline=%!TabooTabline()`
+```
+set tabline=%!TabooTabline()
+```
 
 
- This plugin does not set any mapping for you but it would be useful to set the following: 
+This plugin does not set any mapping for you but it would be useful to set the following: 
  
- * `nnoremap <leader>$ :TabooRenameTabPrompt<CR>`: easily rename the current tab.
+```
+nnoremap <leader>$ :TabooRenameTabPrompt<CR>`: easily rename the current tab.
+```
 
 
 ### Usage
