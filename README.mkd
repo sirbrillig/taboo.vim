@@ -1,7 +1,7 @@
 ## Taboo.vim
 
 Taboo is a simple plugin for easily cutomize and rename tabs. 
-This project is still under heavy development and at the moment **works only with vim running inside a terminal**.
+This project is still under heavy development and at the moment **works only with terminal vim**.
 
 
 ### Installation
@@ -24,15 +24,4 @@ This project is still under heavy development and at the moment **works only wit
  * `:TabooOpenTabPrompt` to open a new tab with a custom name
  * `:TabooResetTabName` to reset the current tab label to its original name
 
- For other commands and informations type `:help taboo.vim`
-
-
-### Available settings
-
- * `g:tab_persistent_label` controls the way a label remains attached to
- a specifi number of tab. 
- * `g:tab_type_path` controls the way the tabs labels are displayed  
- * `g:tab_display_tabnr`: controls the way tabs numbers are displayed 
-
- 
- For other settings and informations type `:help taboo.vim`
+ For other commands and settings type `:help taboo.vim`
