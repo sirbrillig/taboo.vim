@@ -24,4 +24,4 @@ This project is still under heavy development and at the moment **works only wit
  * `:TabooOpenTabPrompt` to open a new tab with a custom name
  * `:TabooResetTabName` to reset the current tab label to its original name
 
- For other commands and settings type `:help taboo.vim`
+ For other commands and settings type `:help taboo.txt`
