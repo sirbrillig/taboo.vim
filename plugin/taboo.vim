@@ -6,7 +6,7 @@
 " Version: 0.0.1
 " =============================================================================
 
-" Init --------------------------- {{{
+" Init ------------------------------------------ {{{
 
 if exists("g:loaded_taboo") || &cp
     finish
@@ -15,7 +15,7 @@ let g:loaded_taboo = 1
 
 " }}}
 
-" Initialize variables ----------- {{{
+" Initialize variables -------------------------- {{{
 
 if !exists("s:tabs")
     let s:tabs = {}
@@ -33,7 +33,7 @@ endif
 
 " }}}
 
-" Initialize default settings ---- {{{
+" Initialize default settings ------------------- {{{
 
 " format options:
 "
@@ -53,11 +53,11 @@ endif
 "
 
 if !exists("g:taboo_format")
-    let g:taboo_format = "%N %f%m"
+    let g:taboo_format = "%n %f%m"
 endif
 
 if !exists("g:taboo_format_renamed")
-    let g:taboo_format_renamed = "%N [%f]%m"
+    let g:taboo_format_renamed = "%n [%f]%m"
 endif
 
 if !exists("g:taboo_modified_flag")
@@ -75,7 +75,7 @@ endif
 " }}}
 
 
-" TabooTabline ------------------- {{{
+" TabooTabline ---------------------------------- {{{
 " This function will be called inside the terminal
 
 function! TabooTabline()
@@ -91,7 +91,7 @@ function! TabooTabline()
             let label_items = s:parse_fmt_str(g:taboo_format_renamed)
         endif
 
-        let tabln .= s:expand_fmt(i, label_items)
+        let tabln .= s:expand_fmt_str(i, label_items)
     endfor
      
     let tabln .= '%#TabLineFill#'
@@ -101,7 +101,7 @@ function! TabooTabline()
 endfunction
 " }}}
 
-" parse_fmt_str ------------------ {{{
+" parse_fmt_str --------------------------------- {{{
 " %s at the end of the string a and orphan %s such as the first % of '%%f'
 " are ignored (FIX??)
 function! s:parse_fmt_str(str)
@@ -120,12 +120,13 @@ function! s:parse_fmt_str(str)
 endfunction
 " }}}
 
-" expand_ftm --------------------- {{{
-function! s:expand_fmt(tabnr, items)
+" expand_fmt ------------------------------------ {{{
+function! s:expand_fmt_str(tabnr, items)
 
     let active_tabnr = tabpagenr()        
     let buflist = tabpagebuflist(a:tabnr)
     let winnr = tabpagewinnr(a:tabnr)
+    let last_active_buf = buflist[winnr - 1]
     let label = ""
 
     " specific highlighting for the current tab
@@ -135,9 +136,9 @@ function! s:expand_fmt(tabnr, items)
         if i[0] == '%' 
              " expand flag
             if i ==# "%m"
-                let label .= s:expand_modified_flag(buflist)
+                let label .= s:expand_modified_flag(last_active_buf, buflist)
             elseif i == "%f" || i ==# "%a" 
-                let label .= s:expand_path(i, a:tabnr, buflist)
+                let label .= s:expand_path(i, a:tabnr, last_active_buf)
             elseif i == "%n" " note: == -> case insensitive comparison
                 let label .= s:expand_tab_number(i, a:tabnr, active_tabnr)
             elseif i ==# "%b"
@@ -154,7 +155,7 @@ function! s:expand_fmt(tabnr, items)
 endfunction
 " }}}
 
-" expand_tab_number -------------- {{{
+" expand_tab_number ----------------------------- {{{
 function! s:expand_tab_number(flag, tabnr, active_tabnr)
     if a:flag ==# "%n" " ==# : case sensitive comparison
         return a:tabnr == a:active_tabnr ? a:tabnr : ''
@@ -164,22 +165,28 @@ function! s:expand_tab_number(flag, tabnr, active_tabnr)
 endfunction
 " }}}
 
-" expand_modified_flag ----------- {{{
-function! s:expand_modified_flag(buflist)
-    " add the modified flag if there is some modified buffer into the tab. 
-    let buf_mod = 0
-    for b in a:buflist
-        if getbufvar(b, "&mod")
-            let buf_mod = 1
+" expand_modified_flag -------------------------- {{{
+function! s:expand_modified_flag(last_active_buf, buflist)
+    if 1 " FIX How do i get the renamed flag here?
+        " add the modified flag if there is some modified buffer into the tab. 
+        let buf_mod = 0
+        for b in a:buflist
+            if getbufvar(b, "&mod")
+                let buf_mod = 1
+            endif
+        endfor
+        return buf_mod ? g:taboo_modified_flag : ''
+    else
+        if getbufvar(last_active_buf, "&mod")
+            return g:taboo_modified_flag
         endif
-    endfor
-    return buf_mod ? g:taboo_modified_flag : ''
+    endif
 endfunction
 " }}}
 
-" expand_path -------------------- {{{
-function! s:expand_path(flag, tabnr, buflist)
-    let bn = bufname(a:buflist[0])
+" expand_path ----------------------------------- {{{
+function! s:expand_path(flag, tabnr, last_active_buf)
+    let bn = bufname(a:last_active_buf) " FIX: this is not the active last buffer
     let file_path = fnamemodify(bn, ':p:t')
     let abs_path = fnamemodify(bn, ':p:h')
 
@@ -206,9 +213,11 @@ function! s:expand_path(flag, tabnr, buflist)
 endfunction
 " }}}
 
+
 " rename tab {{{
 function! s:RenameTab(label)
     call s:add_tab(tabpagenr(), a:label) " TODO: change the name in raname_tab ?
+    "refresh tabline
     exec "set showtabline=" . &showtabline 
 endfunction
 
@@ -222,7 +231,8 @@ endfunction
 function! s:OpenNewTab(label)
     exec "w | tabe"
     call s:add_tab(tabpagenr(), a:label)
-    exec "set showtabline=" . &showtabline   " refresh the tabline TODO: find a better solution
+    "refresh tabline
+    exec "set showtabline=" . &showtabline
 endfunction
 
 function! s:OpenNewTabPrompt()
@@ -235,8 +245,8 @@ endfunction
 function! s:ResetTabName()
     call s:remove_tab(tabpagenr())
     call s:add_tab(tabpagenr(), '')
-    exec "set showtabline=" . &showtabline   " refresh the tabline TODO: find a better solution
-    "set showtabline=1 " refresh tabline. TODO: find a better solution
+    "refresh tabline
+    exec "set showtabline=" . &showtabline 
 endfunction
 " }}}
 
@@ -273,7 +283,7 @@ endfunction
 " }}}
 
 
-" operations on the tabs register {{{
+" operations on the tabs list {{{
 " =============================================================================
 
 function! s:remove_tab(tabnr)
@@ -285,6 +295,7 @@ function! s:add_tab(tabnr, label)
 endfunction
                     
 " }}}
+
 
 " helper functions {{{
 " =============================================================================
