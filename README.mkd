@@ -24,8 +24,8 @@ nnoremap <leader>$ :TabooRenameTabPrompt<CR>`: easily rename the current tab.
 
 ### Usage
 
- * `:TabooRenameTabPrompt` to rename the label of current tab
- * `:TabooOpenTabPrompt` to open a new tab with a custom name
- * `:TabooResetTabName` to reset the current tab label to its original name
+* `:TabooRenameTabPrompt` to rename the label of current tab
+* `:TabooOpenTabPrompt` to open a new tab with a custom name
+* `:TabooResetTabName` to reset the current tab label to its original name
 
- For other commands and settings type `:help taboo.txt`
+For other commands and settings type `:help taboo.txt`
