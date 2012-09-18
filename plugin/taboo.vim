@@ -1,7 +1,7 @@
 " =============================================================================
 " File: taboo.vim
 " Description: A little plugin for managing tabs in terminal vim  
-" Mantainer: Giacomo Comitti <giacomit at gmail dot com>
+" Mantainer: Giacomo Comitti (https://github.com/gcmt)
 " Url: https://github.com/gcmt/taboo.vim
 " Last Changed: 18 Sep 2012
 " Version: 0.1.0
@@ -30,24 +30,8 @@ endif
 " }}}
 
 " Initialize default settings ------------------- {{{
-
-" format strings:
 "
-"   displayed name:
-"   %f -> file name in normal tab or custom label for renamed tab
-"   %F -> path relative to $HOME
-"   %a -> absolute path
-"   %[n]a -> custom level of path depth
-"
-"   numbers:
-"   %n -> show tab number only on the active tab
-"   %N -> show always tab number
-"
-"   flags:
-"   %m -> modified flag
-"   %w -> number of windows opened in the tab
-"
-
+" :help taboo.txt for format items
 if !exists("g:taboo_format")
     let g:taboo_format = " %n %f%m "
 endif
@@ -55,10 +39,6 @@ endif
 if !exists("g:taboo_format_renamed")
     let g:taboo_format_renamed = " %n [%f]%m "
 endif
-
-if !exists("g:taboo_open_empty_tab")
-    let g:taboo_open_empty_tab= 1
-endif    
 
 if !exists("g:taboo_modified_flag")
     let g:taboo_modified_flag= "*"
@@ -75,7 +55,10 @@ endif
 if !exists("g:taboo_enable_mappings")
     let g:taboo_enable_mappings = 1
 endif           
-
+ 
+if !exists("g:taboo_open_empty_tab")
+    let g:taboo_open_empty_tab= 1
+endif     
 " }}}
 
 
