@@ -45,8 +45,7 @@ endif
 "
 "   flags:
 "   %m -> modified flag
-"   %b -> number of buffers opened in a tab
-"         (same as windows number)
+"   %w -> number of windows opened in the tab
 "
 
 if !exists("g:taboo_format")
@@ -76,7 +75,7 @@ endif
 " }}}
 
 
-" CONSTRUCT THE TABLINE
+" CONSTRUCT THE [GUI]TABLINE
 " =============================================================================
 
 " TabooTabline ---------------------------------- {{{
@@ -105,6 +104,32 @@ function! TabooTabline()
 endfunction
 " }}}
 
+" TabooTabline ---------------------------------- {{{
+" This function construct the tabline string (only in terminal vim)
+"
+function! TabooTabline()
+    "call s:update_tabs()
+
+    let tabln = ''
+    for i in range(1, tabpagenr('$'))
+
+        let tab = get(s:tabs, i)
+        if empty(tab)  " not renamed
+            let label_items = s:parse_fmt_str(g:taboo_format)
+        else
+            let label_items = s:parse_fmt_str(g:taboo_format_renamed)
+        endif
+
+        let tabln .= s:expand_fmt_str(i, label_items)
+    endfor
+     
+    let tabln .= '%#TabLineFill#'
+    let tabln .= '%=%#TabLine#%999X' . g:taboo_close_label
+
+    return tabln
+endfunction
+" }}} 
+
 " parse_fmt_str --------------------------------- {{{
 " To parse the format string and return a list of tokens, where a token is
 " a single character or a flag such as %f or %2a
@@ -115,7 +140,7 @@ function! s:parse_fmt_str(str)
     let tokens = []
     let i = 0
     while i < strlen(a:str)
-        let pos = match(a:str, '%\(f\|F\|\d\?a\|n\|N\|m\|b\)', i)
+        let pos = match(a:str, '%\(f\|F\|\d\?a\|n\|N\|m\|w\)', i)
         if pos < 0
             call extend(tokens, split(strpart(a:str, i, strlen(a:str) - i), '\zs'))
             let i = strlen(a:str)
@@ -160,8 +185,8 @@ function! s:expand_fmt_str(tabnr, items)
                 let label .= s:expand_path(i, a:tabnr, last_active_buf)
             elseif i == "%n" " note: == -> case insensitive comparison
                 let label .= s:expand_tab_number(i, a:tabnr, active_tabnr)
-            elseif i ==# "%b"
-                let label .= len(buflist)
+            elseif i ==# "%w"
+                let label .= tabpagewinnr(tabnr, '$')
             endif
         else
             let label .= i
