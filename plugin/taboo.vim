@@ -9,7 +9,7 @@
 
 " Init ------------------------------------------ {{{
 
-if exists("g:loaded_taboo") || &cp
+if exists("g:loaded_taboo") || &cp || has("gui_running")
     finish
 endif
 let g:loaded_taboo = 1
