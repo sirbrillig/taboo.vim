@@ -67,22 +67,22 @@ TabooRenameTab                                                *TabooRenameTab*
 To rename the current tab. An argument (the new tab name) is required.
     
 
-TabooRenameTabPrompt                                          *TabooRenameTab* 
+TabooRenameTabPrompt                                    *TabooRenameTabPrompt* 
 
 To rename the current tab. A prompt will open to ask for the new tab name.
 
 
-TabooOpenTab                                                  *TabooRenameTab*
+TabooOpenTab                                                    *TabooOpenTab*
 
 To open a new tab next to active. An argument (the tab name) is required.
 
 
-TabooOpenTabPrompt                                            *TabooRenameTab* 
+TabooOpenTabPrompt                                        *TabooOpenTabPrompt*
 
 To open a new tab next to active. A prompt will open to ask for the tab name.
 
 
-TabooCloseTab                                                 *TabooRenameTab* 
+TabooCloseTab                                                  *TabooCloseTab* 
 
 To close the current tab. 
 WARNING: this function is essential for closing tabs. If not used, things 
