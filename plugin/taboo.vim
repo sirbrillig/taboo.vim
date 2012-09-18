@@ -324,7 +324,7 @@ endfunction
 " }}}
 
 
-" HELPER FUNCTIONS {{{
+" HELPER FUNCTIONS
 " =============================================================================
 
 " strip {{{
@@ -370,12 +370,15 @@ command! -bang -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
 command! -bang -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
 command! -bang -nargs=0 TabooCloseTab call s:CloseTab()
 command! -bang -nargs=0 TabooResetName call s:ResetTabName()
+command! -bang -nargs=0 Test echo s:tabs
 
 
 " AUTOCOMMANDS
 " =============================================================================
 
 augroup taboo
+    " when I enter vim with a file as argument TabEnter in not triggered
+    au VimEnter * call s:update_tabs() " mmh
     au TabEnter * call s:update_tabs() 
 augroup END
 
