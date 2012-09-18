@@ -38,9 +38,10 @@ endif
 " format options:
 "
 "   displayed name:
-"   %f -> file name
+"   %f -> file name in normal tab or custom label for renamed tab
 "   %F -> path relative to $HOME
 "   %a -> absolute path
+"   %[n]a -> custom level of path depth
 "
 "   numbers:
 "   %n -> show tab number only on the active tab
@@ -53,11 +54,11 @@ endif
 "
 
 if !exists("g:taboo_format")
-    let g:taboo_format = "%n %f%m"
+    let g:taboo_format = " %n %2a%m "
 endif
 
 if !exists("g:taboo_format_renamed")
-    let g:taboo_format_renamed = "%n [%f]%m"
+    let g:taboo_format_renamed = " %n [%f]%m "
 endif
 
 if !exists("g:taboo_modified_flag")
@@ -76,8 +77,6 @@ endif
 
 
 " TabooTabline ---------------------------------- {{{
-" This function will be called inside the terminal
-
 function! TabooTabline()
     "call s:update_tabs()
 
@@ -106,18 +105,26 @@ function! s:parse_fmt_str(str)
     let tokens = []
     let i = 0
     while i < strlen(a:str)
-        let pos = match(a:str, '%\(f\|F\|a\|n\|N\|m\|b\)', i)
+        let pos = match(a:str, '%\(f\|F\|\d\?a\|n\|N\|m\|b\)', i)
         if pos < 0
             call extend(tokens, split(strpart(a:str, i, strlen(a:str) - i), '\zs'))
             let i = strlen(a:str)
         else
             call extend(tokens, split(strpart(a:str, i, pos - i), '\zs'))
-            call add(tokens, a:str[pos] . a:str[pos + 1])
-            let i = pos + 2
+            " determne if a number is given as second character
+            let flag_len = match(a:str[pos + 1], "[0-9]") >= 0 ? 3 : 2
+            if flag_len == 2
+                call add(tokens, a:str[pos] . a:str[pos + 1])
+                let i = pos + 2
+            else
+                call add(tokens, a:str[pos] . a:str[pos + 1] . a:str[pos + 2])
+                let i = pos + 3
+            endif
         endif
     endwhile
+
     return tokens
-endfunction      
+endfunction          
 " }}}
 
 " expand_fmt ------------------------------------ {{{
@@ -131,13 +138,12 @@ function! s:expand_fmt_str(tabnr, items)
 
     " specific highlighting for the current tab
     let label .= a:tabnr == active_tabnr ? '%#TabLineSel#' : '%#TabLine#'
-    let label .= " "
     for i in a:items
         if i[0] == '%' 
              " expand flag
             if i ==# "%m"
                 let label .= s:expand_modified_flag(last_active_buf, buflist)
-            elseif i == "%f" || i ==# "%a" 
+            elseif i == "%f" || i ==# "%a" || match(i, "%[0-9]a") == 0 
                 let label .= s:expand_path(i, a:tabnr, last_active_buf)
             elseif i == "%n" " note: == -> case insensitive comparison
                 let label .= s:expand_tab_number(i, a:tabnr, active_tabnr)
@@ -147,10 +153,7 @@ function! s:expand_fmt_str(tabnr, items)
         else
             let label .= i
         endif
-
     endfor
-    let label .= " "
-
     return label
 endfunction
 " }}}
@@ -190,23 +193,35 @@ function! s:expand_path(flag, tabnr, last_active_buf)
     let file_path = fnamemodify(bn, ':p:t')
     let abs_path = fnamemodify(bn, ':p:h')
 
-    let label = get(s:tabs, a:tabnr)
-    if empty(label) " not renamed
-        let path = ""
-        if a:flag ==# "%f"
-            let path = file_path
-        elseif a:flag ==# "%F"
-            let path = substitute(abs_path . '/', $HOME, '', '')
-            let path = "~" . path . file_path
-        elseif a:flag ==# "%a"
-            let path = abs_path . "/" . file_path
-        endif
-
-        if empty(path)
-            let path = g:taboo_unnamed_label
-        endif
+    if empty(file_path)
+        let path = g:taboo_unnamed_label
     else
-        let path = label
+        let label = get(s:tabs, a:tabnr)
+        if empty(label) " not renamed tab
+            let path = ""
+            if a:flag ==# "%f"
+                let path = file_path
+            elseif a:flag ==# "%F"
+                let path = substitute(abs_path . '/', $HOME, '', '')
+                let path = "~" . path . file_path
+            elseif a:flag ==# "%a"
+                let path = abs_path . "/" . file_path
+            elseif match(a:flag, "%[0-9]a") == 0
+                let n = a:flag[1]
+                let path_tokens = split(abs_path . "/" . file_path, "/")
+                let depth = n > len(path_tokens) ? len(path_tokens) : n
+                let path = ""
+                for i in range(len(path_tokens))
+                    let k = len(path_tokens) - n
+                    if i >= k
+                        let path .= (i > k ? '/' : '') . path_tokens[i]
+                    endif
+                endfor
+            endif
+        else
+            " renamed tab
+            let path = label
+        endif
     endif
 
     return path
