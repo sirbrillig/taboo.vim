@@ -1,9 +1,0 @@
-* add command for opening a fresh new tab
-* add command for closing a tab
-* open tabs next to active or at the end
-* find a way to intercept opening and closing tabs without a custom command
-* change data structure for storing tabs from a disctionary to a list?
-* add flag "show number of windows in a tab"
-* move tab left and move tab right
-* clone tab
-*
