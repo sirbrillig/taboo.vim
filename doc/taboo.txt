@@ -1,7 +1,9 @@
-*taboo.txt*    manage and rename your tabs in terminal vim
+*taboo.txt*    
 *taboo*
 
                                    Taboo
+                 manage and rename your tabs in terminal vim
+                                     ~
                               Reference Manual
 
 ==============================================================================
