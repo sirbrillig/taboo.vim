@@ -4,7 +4,7 @@
 " Mantainer: Giacomo Comitti <giacomit at gmail dot com>
 " Url: https://github.com/gcmt/taboo.vim
 " Last Changed: 18 Sep 2012
-" Version: 0.0.1
+" Version: 0.1.0
 " =============================================================================
 
 " Init ------------------------------------------ {{{
@@ -27,7 +27,6 @@ endif
 if !exists("s:taboo_fmt_char")
     let s:taboo_fmt_char = '%'
 endif
-
 " }}}
 
 " Initialize default settings ------------------- {{{
@@ -277,7 +276,6 @@ function! s:OpenNewTabPrompt()
     let label = s:strip(input("Tab label: "))
     call s:OpenNewTab(label)
 endfunction
-
 " }}}
 
 " reset tab name -------------------------------- {{{
@@ -289,7 +287,6 @@ function! s:ResetTabName()
     "refresh tabline
     call s:tabline_refresh()
 endfunction
-
 " }}}
 
 " close tab ------------------------------------- {{{
@@ -304,20 +301,19 @@ function! s:CloseTab()
         echo "Nothing to close!"
     endif
 endfunction
-
 " }}}
 
 
 " OPERATIONS ON THE TAB LIST
 " =============================================================================
 
-" remove_tab {{{
+" remove_tab ------------------------------------ {{{
 function! s:remove_tab(tabnr)
     unlet s:tabs[a:tabnr]
 endfunction
 " }}}
 
-" add_tab {{{
+" add_tab --------------------------------------- {{{
 function! s:add_tab(tabnr, label)
     let s:tabs[a:tabnr] = a:label
 endfunction                    
@@ -327,19 +323,27 @@ endfunction
 " HELPER FUNCTIONS
 " =============================================================================
 
-" strip {{{
+" strip ----------------------------------------- {{{
+" To strip surrounding whitespaces and tabs from a string. 
+"
 function! s:strip(str)
     return substitute(a:str, '^\s*\(.\{-}\)\s*$', '\1', '')
 endfunction
 " }}}
 
-" tabline_refresh {{{
+" tabline_refresh ------------------------------- {{{
+"
 function! s:tabline_refresh()
     exec "set showtabline=" . &showtabline 
 endfunction!
 " }}}
 
-" shift_to_left_tabs_from {{{
+" shift_to_left_tabs_from ----------------------- {{{
+" To update the tab list when a tab at any position is closed. When a tab is
+" closed, all tabs on its right gets shifted to fill the old tab position. This
+" function ensure this update in the state of the tabline gets reflected also
+" in the tab list owned by the taboo plugin. 
+"
 function! s:shift_to_left_tabs_from(currtab)
     let r_tabs = filter(keys(s:tabs), 'v:val > ' . a:currtab)
     for i in r_tabs 
@@ -351,8 +355,10 @@ endfunction
 " }}}
 
 " update_tabs {{{
+" To 'register' a tab whenever it is created but only if it is not already
+" registered.
+"
 function! s:update_tabs()
-    " register every tab when it is created
     let t = get(s:tabs, tabpagenr(), "")
     if empty(t)
         call s:add_tab(tabpagenr(), '')
@@ -377,7 +383,7 @@ command! -bang -nargs=0 Test echo s:tabs
 " =============================================================================
 
 augroup taboo
-    " when I enter vim with a file as argument TabEnter in not triggered
+    " when I enter vim the TabEnter event is not triggered
     au VimEnter * call s:update_tabs() " mmh
     au TabEnter * call s:update_tabs() 
 augroup END
