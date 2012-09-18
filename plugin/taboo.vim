@@ -46,11 +46,10 @@ endif
 "   flags:
 "   %m -> modified flag
 "   %w -> number of windows opened in the tab
-"   %r -> read-only
 "
 
 if !exists("g:taboo_format")
-    let g:taboo_format = " %n %r%f%m "
+    let g:taboo_format = " %n %f%m "
 endif
 
 if !exists("g:taboo_format_renamed")
@@ -65,10 +64,6 @@ if !exists("g:taboo_modified_flag")
     let g:taboo_modified_flag= "*"
 endif    
 
-if !exists("g:taboo_readonly_flag")
-    let g:taboo_readonly_flag= "-"
-endif     
-
 if !exists("g:taboo_close_label")
     let g:taboo_close_label = ''
 endif    
@@ -76,6 +71,10 @@ endif
 if !exists("g:taboo_unnamed_label")
     let g:taboo_unnamed_label = '[no name]'
 endif    
+
+if !exists("g:taboo_enable_mappings")
+    let g:taboo_enable_mappings = 1
+endif           
 
 " }}}
 
@@ -109,32 +108,6 @@ function! TabooTabline()
 endfunction
 " }}}
 
-" TabooTabline ---------------------------------- {{{
-" This function construct the tabline string (only in terminal vim)
-"
-function! TabooTabline()
-    "call s:update_tabs()
-
-    let tabln = ''
-    for i in range(1, tabpagenr('$'))
-
-        let tab = get(s:tabs, i)
-        if empty(tab)  " not renamed
-            let label_items = s:parse_fmt_str(g:taboo_format)
-        else
-            let label_items = s:parse_fmt_str(g:taboo_format_renamed)
-        endif
-
-        let tabln .= s:expand_fmt_str(i, label_items)
-    endfor
-     
-    let tabln .= '%#TabLineFill#'
-    let tabln .= '%=%#TabLine#%999X' . g:taboo_close_label
-
-    return tabln
-endfunction
-" }}} 
-
 " parse_fmt_str --------------------------------- {{{
 " To parse the format string and return a list of tokens, where a token is
 " a single character or a flag such as %f or %2a
@@ -145,7 +118,7 @@ function! s:parse_fmt_str(str)
     let tokens = []
     let i = 0
     while i < strlen(a:str)
-        let pos = match(a:str, '%\(f\|F\|\d\?a\|n\|N\|m\|w\|r\)', i)
+        let pos = match(a:str, '%\(f\|F\|\d\?a\|n\|N\|m\|w\)', i)
         if pos < 0
             call extend(tokens, split(strpart(a:str, i, strlen(a:str) - i), '\zs'))
             let i = strlen(a:str)
@@ -183,7 +156,7 @@ function! s:expand_fmt_str(tabnr, items)
     let label .= a:tabnr == active_tabnr ? '%#TabLineSel#' : '%#TabLine#'
     for i in a:items
         if i[0] == '%' 
-             " expand flag
+            " expand flag
             if i ==# "%m"
                 let label .= s:expand_modified_flag(last_active_buf, buflist)
             elseif i == "%f" || i ==# "%a" || match(i, "%[0-9]a") == 0 
@@ -192,10 +165,6 @@ function! s:expand_fmt_str(tabnr, items)
                 let label .= s:expand_tab_number(i, a:tabnr, active_tabnr)
             elseif i ==# "%w"
                 let label .= tabpagewinnr(tabnr, '$')
-            elseif i ==# "%r"
-                if getbufvar(a:tabnr, "&ro")
-                    let label .= g:taboo_readonly_flag
-                endif
             endif
         else
             let label .= i
@@ -242,12 +211,12 @@ function! s:expand_path(flag, tabnr, last_active_buf)
     let bn = bufname(a:last_active_buf)
     let file_path = fnamemodify(bn, ':p:t')
     let abs_path = fnamemodify(bn, ':p:h')
+    let label = get(s:tabs, a:tabnr)
 
-    if empty(file_path)
-        let path = g:taboo_unnamed_label
-    else
-        let label = get(s:tabs, a:tabnr)
-        if empty(label) " not renamed tab
+    if empty(label) " not renamed tab
+        if empty(file_path)
+            let path = g:taboo_unnamed_label
+        else   
             let path = ""
             if a:flag ==# "%f"
                 let path = file_path
@@ -268,10 +237,10 @@ function! s:expand_path(flag, tabnr, last_active_buf)
                     endif
                 endfor
             endif
-        else
-            " renamed tab
-            let path = label
         endif
+    else
+        " renamed tab
+        let path = label
     endif
 
     return path
@@ -301,7 +270,8 @@ endfunction
 " To open a new tab with a custom name.
 "
 function! s:OpenNewTab(label)
-    exec "w | tabe" . (g:taboo_open_empty_tab ? '' : '%') 
+    let save = empty(bufname('%')) ? '' : 'w | ' 
+    exec save . "tabe " . (g:taboo_open_empty_tab ? '' : '%') 
     call s:add_tab(tabpagenr(), a:label)
     call s:tabline_refresh()
 endfunction
@@ -404,13 +374,23 @@ endfunction
 " COMMANDS
 " =============================================================================
 
-command! -bang -nargs=1 TabooRenameTab call s:RenameTab(<q-args>)
-command! -bang -nargs=0 TabooRenameTabPrompt call s:RenameTabPrompt()
-command! -bang -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
-command! -bang -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
-command! -bang -nargs=0 TabooCloseTab call s:CloseTab()
-command! -bang -nargs=0 TabooResetName call s:ResetTabName()
-command! -bang -nargs=0 Test echo s:tabs
+command! -nargs=1 TabooRenameTab call s:RenameTab(<q-args>)
+command! -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
+command! -nargs=0 TabooRenameTabPrompt call s:RenameTabPrompt()
+command! -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
+command! -nargs=0 TabooCloseTab call s:CloseTab()
+command! -nargs=0 TabooResetName call s:ResetTabName()
+
+
+" MAPPINGS
+" =============================================================================
+
+if g:taboo_enable_mappings
+    nnoremap <silent> <leader>tt :TabooRenameTabPrompt<CR>
+    nnoremap <silent> <leader>to :TabooOpenTabPrompt<CR>
+    nnoremap <silent> <leader>td :TabooCloseTab<CR>
+    nnoremap <silent> <leader>tr :TabooResetName<CR>
+endif
 
 
 " AUTOCOMMANDS
