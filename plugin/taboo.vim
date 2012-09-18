@@ -1,8 +1,9 @@
 " =============================================================================
 " File: taboo.vim
-" Description: A little plugin for managing tabs in vim  
+" Description: A little plugin for managing tabs in terminal vim  
 " Mantainer: Giacomo Comitti <giacomit at gmail dot com>
-" Last Changed: 17 Sep 2012
+" Url: https://github.com/gcmt/taboo.vim
+" Last Changed: 18 Sep 2012
 " Version: 0.0.1
 " =============================================================================
 
@@ -15,27 +16,23 @@ let g:loaded_taboo = 1
 
 " }}}
 
-" Initialize variables -------------------------- {{{
+" Initialize private variables ------------------ {{{
 
+" where all tabs are stored
 if !exists("s:tabs")
     let s:tabs = {}
 endif
 
-" used to split surrounding characters given in the same string
-if !exists("s:taboo_split_char")
-    let s:taboo_split_char = '@'
-endif
-
+" the special character used to recognize a special flags in the format string
 if !exists("s:taboo_fmt_char")
     let s:taboo_fmt_char = '%'
 endif
-
 
 " }}}
 
 " Initialize default settings ------------------- {{{
 
-" format options:
+" format strings:
 "
 "   displayed name:
 "   %f -> file name in normal tab or custom label for renamed tab
@@ -54,12 +51,16 @@ endif
 "
 
 if !exists("g:taboo_format")
-    let g:taboo_format = " %n %2a%m "
+    let g:taboo_format = " %n %f%m "
 endif
 
 if !exists("g:taboo_format_renamed")
     let g:taboo_format_renamed = " %n [%f]%m "
 endif
+
+if !exists("g:taboo_open_empty_tab")
+    let g:taboo_open_empty_tab= 1
+endif    
 
 if !exists("g:taboo_modified_flag")
     let g:taboo_modified_flag= "*"
@@ -76,7 +77,12 @@ endif
 " }}}
 
 
+" CONSTRUCT THE TABLINE
+" =============================================================================
+
 " TabooTabline ---------------------------------- {{{
+" This function construct the tabline string (only in terminal vim)
+"
 function! TabooTabline()
     "call s:update_tabs()
 
@@ -101,6 +107,11 @@ endfunction
 " }}}
 
 " parse_fmt_str --------------------------------- {{{
+" To parse the format string and return a list of tokens, where a token is
+" a single character or a flag such as %f or %2a
+" Example:
+"   parse_fmt_str("%n %tab") -> ['%n', ' ', '%', 't', 'a', 'b'] 
+"
 function! s:parse_fmt_str(str)
     let tokens = []
     let i = 0
@@ -128,6 +139,9 @@ endfunction
 " }}}
 
 " expand_fmt ------------------------------------ {{{
+" To expand flags contained in the `items` list of tokes into their respective
+" meanings.
+"
 function! s:expand_fmt_str(tabnr, items)
 
     let active_tabnr = tabpagenr()        
@@ -159,6 +173,7 @@ endfunction
 " }}}
 
 " expand_tab_number ----------------------------- {{{
+"
 function! s:expand_tab_number(flag, tabnr, active_tabnr)
     if a:flag ==# "%n" " ==# : case sensitive comparison
         return a:tabnr == a:active_tabnr ? a:tabnr : ''
@@ -169,6 +184,7 @@ endfunction
 " }}}
 
 " expand_modified_flag -------------------------- {{{
+"
 function! s:expand_modified_flag(last_active_buf, buflist)
     if 1 " FIX How do i get the renamed flag here?
         " add the modified flag if there is some modified buffer into the tab. 
@@ -188,8 +204,9 @@ endfunction
 " }}}
 
 " expand_path ----------------------------------- {{{
+"
 function! s:expand_path(flag, tabnr, last_active_buf)
-    let bn = bufname(a:last_active_buf) " FIX: this is not the active last buffer
+    let bn = bufname(a:last_active_buf)
     let file_path = fnamemodify(bn, ':p:t')
     let abs_path = fnamemodify(bn, ':p:h')
 
@@ -229,43 +246,56 @@ endfunction
 " }}}
 
 
-" rename tab {{{
+" COMMANDS FUNCTIONS
+" =============================================================================
+
+" rename tab ------------------------------------ {{{
+" To rename the current tab.
+"
 function! s:RenameTab(label)
     call s:add_tab(tabpagenr(), a:label) " TODO: change the name in raname_tab ?
-    "refresh tabline
-    exec "set showtabline=" . &showtabline 
+    call s:tabline_refresh()
 endfunction
 
 function! s:RenameTabPrompt()
     let label = s:strip(input("New label: "))
     call s:RenameTab(label)
 endfunction
+
 " }}}
 
-" open new tab {{{
+" open new tab ---------------------------------- {{{
+" To open a new tab with a custom name.
+"
 function! s:OpenNewTab(label)
-    exec "w | tabe"
+    exec "w | tabe" . (g:taboo_open_empty_tab ? '' : '%') 
     call s:add_tab(tabpagenr(), a:label)
-    "refresh tabline
-    exec "set showtabline=" . &showtabline
+    call s:tabline_refresh()
 endfunction
 
 function! s:OpenNewTabPrompt()
     let label = s:strip(input("Tab label: "))
     call s:OpenNewTab(label)
 endfunction
+
 " }}}
 
-" reset tab name {{{
+" reset tab name -------------------------------- {{{
+" If the tab has been renamed the custom label is removed.
+"
 function! s:ResetTabName()
     call s:remove_tab(tabpagenr())
     call s:add_tab(tabpagenr(), '')
     "refresh tabline
-    exec "set showtabline=" . &showtabline 
+    call s:tabline_refresh()
 endfunction
+
 " }}}
 
-" close tab {{{
+" close tab ------------------------------------- {{{
+" Safely close a tab and update all the others tab. It's essential to use ti
+" function to close a tab, otherwise everithing will break. (FIX)
+"
 function! s:CloseTab()
     if len(s:tabs) > 1
         call s:shift_to_left_tabs_from(tabpagenr()) 
@@ -274,6 +304,39 @@ function! s:CloseTab()
         echo "Nothing to close!"
     endif
 endfunction
+
+" }}}
+
+
+" OPERATIONS ON THE TAB LIST
+" =============================================================================
+
+" remove_tab {{{
+function! s:remove_tab(tabnr)
+    unlet s:tabs[a:tabnr]
+endfunction
+" }}}
+
+" add_tab {{{
+function! s:add_tab(tabnr, label)
+    let s:tabs[a:tabnr] = a:label
+endfunction                    
+" }}}
+
+
+" HELPER FUNCTIONS {{{
+" =============================================================================
+
+" strip {{{
+function! s:strip(str)
+    return substitute(a:str, '^\s*\(.\{-}\)\s*$', '\1', '')
+endfunction
+" }}}
+
+" tabline_refresh {{{
+function! s:tabline_refresh()
+    exec "set showtabline=" . &showtabline 
+endfunction!
 " }}}
 
 " shift_to_left_tabs_from {{{
@@ -298,37 +361,19 @@ endfunction
 " }}}
 
 
-" operations on the tabs list {{{
+" COMMANDS
 " =============================================================================
 
-function! s:remove_tab(tabnr)
-    unlet s:tabs[a:tabnr]
-endfunction
-
-function! s:add_tab(tabnr, label)
-    let s:tabs[a:tabnr] = a:label
-endfunction
-                    
-" }}}
-
-
-" helper functions {{{
-" =============================================================================
-
-function! s:strip(str)
-    return substitute(a:str, '^\s*\(.\{-}\)\s*$', '\1', '')
-endfunction
-
-" }}}
-
-
-"command! -bang -nargs=1 TabooRenameTab call s:RenameTab(<q-args>)
+command! -bang -nargs=1 TabooRenameTab call s:RenameTab(<q-args>)
 command! -bang -nargs=0 TabooRenameTabPrompt call s:RenameTabPrompt()
-"command! -bang -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
+command! -bang -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
 command! -bang -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
 command! -bang -nargs=0 TabooCloseTab call s:CloseTab()
-command! -bang -nargs=0 TabooResetTabName call s:ResetTabName()
-command! -bang -nargs=0 Test echo s:tabs
+command! -bang -nargs=0 TabooResetName call s:ResetTabName()
+
+
+" AUTOCOMMANDS
+" =============================================================================
 
 augroup taboo
     au TabEnter * call s:update_tabs() 
