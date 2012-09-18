@@ -46,10 +46,11 @@ endif
 "   flags:
 "   %m -> modified flag
 "   %w -> number of windows opened in the tab
+"   %r -> read-only
 "
 
 if !exists("g:taboo_format")
-    let g:taboo_format = " %n %f%m "
+    let g:taboo_format = " %n %r%f%m "
 endif
 
 if !exists("g:taboo_format_renamed")
@@ -63,6 +64,10 @@ endif
 if !exists("g:taboo_modified_flag")
     let g:taboo_modified_flag= "*"
 endif    
+
+if !exists("g:taboo_readonly_flag")
+    let g:taboo_readonly_flag= "-"
+endif     
 
 if !exists("g:taboo_close_label")
     let g:taboo_close_label = ''
@@ -140,7 +145,7 @@ function! s:parse_fmt_str(str)
     let tokens = []
     let i = 0
     while i < strlen(a:str)
-        let pos = match(a:str, '%\(f\|F\|\d\?a\|n\|N\|m\|w\)', i)
+        let pos = match(a:str, '%\(f\|F\|\d\?a\|n\|N\|m\|w\|r\)', i)
         if pos < 0
             call extend(tokens, split(strpart(a:str, i, strlen(a:str) - i), '\zs'))
             let i = strlen(a:str)
@@ -187,6 +192,10 @@ function! s:expand_fmt_str(tabnr, items)
                 let label .= s:expand_tab_number(i, a:tabnr, active_tabnr)
             elseif i ==# "%w"
                 let label .= tabpagewinnr(tabnr, '$')
+            elseif i ==# "%r"
+                if getbufvar(a:tabnr, "&ro")
+                    let label .= g:taboo_readonly_flag
+                endif
             endif
         else
             let label .= i
