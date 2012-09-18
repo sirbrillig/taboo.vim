@@ -97,16 +97,17 @@ To reset the tab name to its original name.
 ==============================================================================
 5. Options                                                     *taboo-options*
 
+
 ______________________________________________________________________________
 5.1 General behaviour
 
-g:taboo_enable_mappings
+g:taboo_enable_mappings                             *g:taboo_enable_mappings* 
 Set this option to 0 if you want to prevent the plugin to sets mappings that
 may interfere with your configuration.
 
 default: 1
 
-g:taboo_open_empty_tab
+g:taboo_open_empty_tab                               *g:taboo_open_empty_tab* 
 If you set this option to 0, whenever you open a new tab Taboo will try to 
 it with the current buffer
 
