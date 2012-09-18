@@ -102,22 +102,22 @@ endfunction
 " }}}
 
 " parse_fmt_str --------------------------------- {{{
-" %s at the end of the string a and orphan %s such as the first % of '%%f'
-" are ignored (FIX??)
 function! s:parse_fmt_str(str)
-    let items = []
-    for i in range(strlen(a:str)) 
-        let c = a:str[i]
-        if i == 0 && c != s:taboo_fmt_char
-            call add(items, c)
-        elseif a:str[i-1] != s:taboo_fmt_char && c != s:taboo_fmt_char
-            call add(items, c)
-        elseif a:str[i-1] == s:taboo_fmt_char && c != s:taboo_fmt_char
-            call add(items, s:taboo_fmt_char . c)
+    let tokens = []
+    let i = 0
+    while i < strlen(a:str)
+        let pos = match(a:str, '%\(f\|F\|a\|n\|N\|m\|b\)', i)
+        if pos < 0
+            call extend(tokens, split(strpart(a:str, i, strlen(a:str) - i), '\zs'))
+            let i = strlen(a:str)
+        else
+            call extend(tokens, split(strpart(a:str, i, pos - i), '\zs'))
+            call add(tokens, a:str[pos] . a:str[pos + 1])
+            let i = pos + 2
         endif
-    endfor
-    return items
-endfunction
+    endwhile
+    return tokens
+endfunction      
 " }}}
 
 " expand_fmt ------------------------------------ {{{
