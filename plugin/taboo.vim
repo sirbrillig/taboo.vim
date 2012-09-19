@@ -41,11 +41,11 @@ endif
 "
 " :help taboo.txt for format items
 if !exists("g:taboo_format")
-    let g:taboo_format = " %n %f%m "
+    let g:taboo_format = " %f%m "
 endif
 
 if !exists("g:taboo_format_renamed")
-    let g:taboo_format_renamed = " %n [%f]%m "
+    let g:taboo_format_renamed = " [%f]%m "
 endif
 
 if !exists("g:taboo_modified_flag")
@@ -78,8 +78,6 @@ endif
 " The whole tabline is constructed at once.
 "
 function! TabooTabline()
-    "call s:update_tabs()
-
     let tabln = ''
     for i in range(1, tabpagenr('$'))
 
@@ -133,7 +131,7 @@ function! s:parse_fmt_str(str)
 endfunction          
 " }}}
 
-" expand_fmt ------------------------------------ {{{
+" expand_fmt_str -------------------------------- {{{
 " To expand flags contained in the `items` list of tokes into their respective
 " meanings.
 "
@@ -149,14 +147,14 @@ function! s:expand_fmt_str(tabnr, items)
     for i in a:items
         if i[0] == s:fmt_char 
             let f = strpart(i, 1)  " remove the fmt_char
-            if i ==# "m"
-                let label .= s:expand_modified_flag(last_active_buf, buflist)
+            if f ==# "m"
+                let label .= s:expand_modified_flag(buflist)
             elseif f == "f" || f ==# "a" || match(f, "[0-9]a") == 0 
                 let label .= s:expand_path(f, a:tabnr, last_active_buf)
             elseif f == "n" " note: == -> case insensitive comparison
                 let label .= s:expand_tab_number(f, a:tabnr, active_tabnr)
             elseif f ==# "w"
-                let label .= tabpagewinnr(tabnr, '$')
+                let label .= tabpagewinnr(a:tabnr, '$')
             endif
         else
             let label .= i
@@ -179,21 +177,13 @@ endfunction
 
 " expand_modified_flag -------------------------- {{{
 "
-function! s:expand_modified_flag(last_active_buf, buflist)
-    if 1 " FIX How do i get the renamed flag here?
-        " add the modified flag if there is some modified buffer into the tab. 
-        let buf_mod = 0
-        for b in a:buflist
-            if getbufvar(b, "&mod")
-                let buf_mod = 1
-            endif
-        endfor
-        return buf_mod ? g:taboo_modified_flag : ''
-    else
-        if getbufvar(last_active_buf, "&mod")
+function! s:expand_modified_flag(buflist)
+    for b in a:buflist
+        if getbufvar(b, "&mod")
             return g:taboo_modified_flag
         endif
-    endif
+    endfor
+    return ''
 endfunction
 " }}}
 
@@ -262,8 +252,7 @@ endfunction
 " To open a new tab with a custom name.
 "
 function! s:OpenNewTab(label)
-    let save = empty(bufname('%')) ? '' : 'w | ' 
-    exec save . "tabe " . (g:taboo_open_empty_tab ? '' : '%') 
+    exec "tabe! " . (g:taboo_open_empty_tab ? '' : '%') 
     call s:add_tab(tabpagenr(), a:label)
     call s:tabline_refresh()
 endfunction
@@ -343,7 +332,12 @@ function! s:update_tabs()
     endif
 
     " detect if a tab has been closed. If so delete it from the tab list and 
-    " update all others tab
+    " update all others tab. In macVim, when i close a tab and this function
+    " is triggered by the TabEnter or WinEnter events, tabpagenr('$') does
+    " not decrease by one as expected but retains the value of the state 
+    " where the tab was still opened. It seems that these events are not
+    " triggered when a tab is closed. In terminal vim these events are
+    " triggered as expected.
     let s:cond = s:last_number_of_tabs > tabpagenr('$')
     if s:staging_tab > 0 && s:cond
         call s:shift_to_left_tabs_from(s:staging_tab + 1)
