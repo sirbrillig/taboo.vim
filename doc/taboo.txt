@@ -69,7 +69,7 @@ nnoremap <silent> <leader>tr :TabooResetName<CR>
 ==============================================================================
 4. Commands                                                   *taboo-commands*
 
-TabooRenameTab                                                *TabooRenameTab* 
+TabooRenameTab <name>                                         *TabooRenameTab* 
 
 To rename the current tab. An argument (the new tab name) is required.
     
@@ -79,7 +79,7 @@ TabooRenameTabPrompt                                    *TabooRenameTabPrompt*
 To rename the current tab. A prompt will open to ask for the new tab name.
 
 
-TabooOpenTab                                                    *TabooOpenTab*
+TabooOpenTab <name>                                             *TabooOpenTab*
 
 To open a new tab next to active. An argument (the tab name) is required.
 
