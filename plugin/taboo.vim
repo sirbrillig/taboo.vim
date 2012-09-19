@@ -70,7 +70,7 @@ endif
 " }}}
 
 
-" CONSTRUCT THE [GUI]TABLINE
+" CONSTRUCT THE TABLINE
 " =============================================================================
 
 " TabooTabline ---------------------------------- {{{
@@ -320,12 +320,21 @@ function! s:shift_to_left_tabs_from(currtab)
 endfunction
 " }}}
 
-" update_tabs {{{
-" To 'register' a tab whenever it is created but only if it is not already
-" registered.
+" stage_tab_for_closing ------------------------- {{{
+" This function is triggered on the TabLeave event. This function suppose the
+" tab is going to be closed since we leave it so it saves it in a special
+" variable. The tab is not already removed. 
+" For the next step see s:update_tabs()
+"
+function! s:stage_tab_for_closing(tabnr)
+    let s:staging_tab = a:tabnr
+endfunction
+" }}}
+
+" update_tabs ----------------------------------- {{{
+" To add a tab whenever it is created and to delete a tabs if it is remove.
 "
 function! s:update_tabs()
-    " add a tab when it is created
     let t = get(s:tabs, tabpagenr(), "")
     if empty(t)
         call s:add_tab(tabpagenr(), '')
@@ -338,17 +347,19 @@ function! s:update_tabs()
     " where the tab was still opened. It seems that these events are not
     " triggered when a tab is closed. In terminal vim these events are
     " triggered as expected.
-    let s:cond = s:last_number_of_tabs > tabpagenr('$')
-    if s:staging_tab > 0 && s:cond
+    "
+    " 
+    " If the number of tabs has drecreased and we have in memory a 
+    " tabs previously staged for closing (see stage_tab_for_closing())
+    " we can assume that is the tab that has been closed
+    "
+    let something_closed = s:last_number_of_tabs > tabpagenr('$')
+    if s:staging_tab > 0 && something_closed
         call s:shift_to_left_tabs_from(s:staging_tab + 1)
         call s:remove_tab(max(keys(s:tabs)))
     endif
     let s:staging_tab = 0
     let s:last_number_of_tabs = tabpagenr('$')
-endfunction
-
-function! s:stage_tab_for_closing(tabnr)
-    let s:staging_tab = a:tabnr
 endfunction
 " }}}
 
@@ -368,7 +379,6 @@ command! -nargs=0 TabooResetName call s:ResetTabName()
 if g:taboo_enable_mappings
     nnoremap <silent> <leader>tt :TabooRenameTabPrompt<CR>
     nnoremap <silent> <leader>to :TabooOpenTabPrompt<CR>
-    nnoremap <silent> <leader>td :TabooCloseTab<CR>
     nnoremap <silent> <leader>tr :TabooResetName<CR>
 endif
 
