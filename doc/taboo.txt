@@ -56,8 +56,6 @@ nnoremap <silent> <leader>tt :TabooRenameTabPrompt<CR>
     
 nnoremap <silent> <leader>to :TabooOpenTabPrompt<CR>
     
-nnoremap <silent> <leader>td :TabooCloseTab<CR>
-    
 nnoremap <silent> <leader>tr :TabooResetName<CR>
 
 
@@ -82,13 +80,6 @@ To open a new tab next to active. An argument (the tab name) is required.
 TabooOpenTabPrompt                                        *TabooOpenTabPrompt*
 
 To open a new tab next to active. A prompt will open to ask for the tab name.
-
-
-TabooCloseTab                                                  *TabooCloseTab* 
-
-To close the current tab. 
-WARNING: this function is essential for closing tabs. If not used, things 
-might breaks up.
 
 
 TabooResetTabName                                          *TabooResetTabName*
