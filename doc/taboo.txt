@@ -3,6 +3,7 @@
 
                                    Taboo
                  manage and rename your tabs in terminal vim
+
                                      ~
                               Reference Manual
 
@@ -28,6 +29,12 @@ It allow yout to:
 
     * Rename tabs with the name you prefer
     * Customize what is displayed in each tab label
+
+Why the plugin works only with the terminal version of vim? It seems there is
+bug in MacVim (or a bad behaviour) that prevents the plugin to know which tabs 
+has been closed when more than one tab are opened. Waiting for a solution I 
+decided to not support gui versions at the moment.
+
 
 ==============================================================================
 2. Installation                                           *taboo-installation*
