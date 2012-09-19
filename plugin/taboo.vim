@@ -114,11 +114,10 @@ function! TabooGuiTabLabel()
     else
         let label_items = s:parse_fmt_str(g:taboo_format_renamed)
     endif
-
     let label = s:expand_fmt_str(tabnr, label_items)
 
     return label
-endfunction
+endfunction  
 " }}}
 
 " parse_fmt_str --------------------------------- {{{
