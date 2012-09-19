@@ -3,7 +3,7 @@
 " Description: A little plugin for managing tabs in terminal vim  
 " Mantainer: Giacomo Comitti (https://github.com/gcmt)
 " Url: https://github.com/gcmt/taboo.vim
-" Last Changed: 18 Sep 2012
+" Last Changed: 19 Sep 2012
 " Version: 0.1.0
 " =============================================================================
 
@@ -24,8 +24,16 @@ if !exists("s:tabs")
 endif
 
 " the special character used to recognize a special flags in the format string
-if !exists("s:taboo_fmt_char")
-    let s:taboo_fmt_char = '%'
+if !exists("s:fmt_char")
+    let s:fmt_char = '%'
+endif
+
+if !exists("s:last_number_of_tabs")
+    let s:last_number_of_tabs = tabpagenr()
+endif
+
+if !exists("s:staging_tab")
+    let s:staging_tab = 0
 endif
 " }}}
 
@@ -101,7 +109,7 @@ function! s:parse_fmt_str(str)
     let tokens = []
     let i = 0
     while i < strlen(a:str)
-        let pos = match(a:str, '%\(f\|F\|\d\?a\|n\|N\|m\|w\)', i)
+        let pos = match(a:str, s:fmt_char . '\(f\|F\|\d\?a\|n\|N\|m\|w\)', i)
         if pos < 0
             call extend(tokens, split(strpart(a:str, i, strlen(a:str) - i), '\zs'))
             let i = strlen(a:str)
@@ -138,15 +146,15 @@ function! s:expand_fmt_str(tabnr, items)
     " specific highlighting for the current tab
     let label .= a:tabnr == active_tabnr ? '%#TabLineSel#' : '%#TabLine#'
     for i in a:items
-        if i[0] == '%' 
-            " expand flag
-            if i ==# "%m"
+        if i[0] == s:fmt_char 
+            let f = strpart(i, 1)  " remove the fmt_char
+            if i ==# "m"
                 let label .= s:expand_modified_flag(last_active_buf, buflist)
-            elseif i == "%f" || i ==# "%a" || match(i, "%[0-9]a") == 0 
-                let label .= s:expand_path(i, a:tabnr, last_active_buf)
-            elseif i == "%n" " note: == -> case insensitive comparison
-                let label .= s:expand_tab_number(i, a:tabnr, active_tabnr)
-            elseif i ==# "%w"
+            elseif f == "f" || f ==# "a" || match(f, "[0-9]a") == 0 
+                let label .= s:expand_path(f, a:tabnr, last_active_buf)
+            elseif f == "n" " note: == -> case insensitive comparison
+                let label .= s:expand_tab_number(f, a:tabnr, active_tabnr)
+            elseif f ==# "w"
                 let label .= tabpagewinnr(tabnr, '$')
             endif
         else
@@ -160,7 +168,7 @@ endfunction
 " expand_tab_number ----------------------------- {{{
 "
 function! s:expand_tab_number(flag, tabnr, active_tabnr)
-    if a:flag ==# "%n" " ==# : case sensitive comparison
+    if a:flag ==# "n" " ==# : case sensitive comparison
         return a:tabnr == a:active_tabnr ? a:tabnr : ''
     else
         return a:tabnr
@@ -201,12 +209,12 @@ function! s:expand_path(flag, tabnr, last_active_buf)
             let path = g:taboo_unnamed_label
         else   
             let path = ""
-            if a:flag ==# "%f"
+            if a:flag ==# "f"
                 let path = file_path
-            elseif a:flag ==# "%F"
+            elseif a:flag ==# "F"
                 let path = substitute(abs_path . '/', $HOME, '', '')
                 let path = "~" . path . file_path
-            elseif a:flag ==# "%a"
+            elseif a:flag ==# "a"
                 let path = abs_path . "/" . file_path
             elseif match(a:flag, "%[0-9]a") == 0
                 let n = a:flag[1]
@@ -276,22 +284,8 @@ function! s:ResetTabName()
 endfunction
 " }}}
 
-" close tab ------------------------------------- {{{
-" Safely close a tab and update all the others tab. It's essential to use ti
-" function to close a tab, otherwise everithing will break. (FIX)
-"
-function! s:CloseTab()
-    if len(s:tabs) > 1
-        call s:shift_to_left_tabs_from(tabpagenr()) 
-        exec "tabclose"
-    else
-        echo "Nothing to close!"
-    endif
-endfunction
-" }}}
 
-
-" OPERATIONS ON THE TAB LIST
+" HELPER FUNCTIONS
 " =============================================================================
 
 " remove_tab ------------------------------------ {{{
@@ -305,10 +299,6 @@ function! s:add_tab(tabnr, label)
     let s:tabs[a:tabnr] = a:label
 endfunction                    
 " }}}
-
-
-" HELPER FUNCTIONS
-" =============================================================================
 
 " strip ----------------------------------------- {{{
 " To strip surrounding whitespaces and tabs from a string. 
@@ -346,10 +336,24 @@ endfunction
 " registered.
 "
 function! s:update_tabs()
+    " add a tab when it is created
     let t = get(s:tabs, tabpagenr(), "")
     if empty(t)
         call s:add_tab(tabpagenr(), '')
     endif
+
+    " detect if a tab has been closed. If so delete it from the tab list and 
+    " update all others tab
+    let cond = s:last_number_of_tabs > tabpagenr('$')
+    if !empty(s:staging_tab) && cond
+        call s:remove_tab(s:staging_tab)
+        call s:shift_to_left_tabs_from(s:staging_tab)
+    endif
+    let s:last_number_of_tabs = tabpagenr('$')
+endfunction
+
+function! s:stage_tab_for_closing(tabnr)
+    let s:staging_tab = a:tabnr
 endfunction
 " }}}
 
@@ -361,8 +365,8 @@ command! -nargs=1 TabooRenameTab call s:RenameTab(<q-args>)
 command! -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
 command! -nargs=0 TabooRenameTabPrompt call s:RenameTabPrompt()
 command! -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
-command! -nargs=0 TabooCloseTab call s:CloseTab()
 command! -nargs=0 TabooResetName call s:ResetTabName()
+command! Test echo s:tabs
 
 
 " MAPPINGS
@@ -381,8 +385,9 @@ endif
 
 augroup taboo
     " when I enter vim the TabEnter event is not triggered
-    au VimEnter * call s:update_tabs() " mmh
+    au VimEnter * call s:update_tabs()
     au TabEnter * call s:update_tabs() 
+    au TabLeave * call s:stage_tab_for_closing(tabpagenr()) 
 augroup END
 
 
