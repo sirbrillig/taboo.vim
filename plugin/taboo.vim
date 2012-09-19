@@ -343,12 +343,11 @@ endfunction!
 " in the tab list owned by the taboo plugin. 
 "
 function! s:shift_to_left_tabs_from(currtab)
-    let r_tabs = filter(keys(s:tabs), 'v:val > ' . a:currtab)
+    let r_tabs = filter(keys(s:tabs), 'v:val >= ' . a:currtab)
     for i in r_tabs 
         let t = get(s:tabs, i)
         let s:tabs[i-1] = t
     endfor
-    call s:remove_tab(max(keys(s:tabs)))
 endfunction
 " }}}
 
@@ -367,8 +366,8 @@ function! s:update_tabs()
     " update all others tab
     let cond = s:last_number_of_tabs > tabpagenr('$')
     if !empty(s:staging_tab) && cond
-        call s:remove_tab(s:staging_tab)
-        call s:shift_to_left_tabs_from(s:staging_tab)
+        call s:shift_to_left_tabs_from(s:staging_tab + 1)
+        call s:remove_tab(max(keys(s:tabs)))
     endif
     let s:last_number_of_tabs = tabpagenr('$')
 endfunction
