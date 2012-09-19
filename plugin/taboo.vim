@@ -9,7 +9,7 @@
 
 " Init ------------------------------------------ {{{
 
-if exists("g:loaded_taboo") || &cp || has("gui_running")
+if exists("g:loaded_taboo") || &cp
     finish
 endif
 let g:loaded_taboo = 1
@@ -75,6 +75,7 @@ endif
 
 " TabooTabline ---------------------------------- {{{
 " This function construct the tabline string (only in terminal vim)
+" The whole tabline is constructed at once.
 "
 function! TabooTabline()
     "call s:update_tabs()
@@ -89,6 +90,7 @@ function! TabooTabline()
             let label_items = s:parse_fmt_str(g:taboo_format_renamed)
         endif
 
+        let tabln .= i == tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
         let tabln .= s:expand_fmt_str(i, label_items)
     endfor
      
@@ -96,6 +98,26 @@ function! TabooTabline()
     let tabln .= '%=%#TabLine#%999X' . g:taboo_close_label
 
     return tabln
+endfunction
+" }}}
+
+" TabooGuiTabLabel --------------------------------- {{{
+" Construct a single tab label at once
+"
+function! TabooGuiTabLabel()
+    let label = ""
+    let tabnr = v:lnum
+
+    let t = get(s:tabs, tabnr)
+    if empty(t)  " not renamed
+        let label_items = s:parse_fmt_str(g:taboo_format)
+    else
+        let label_items = s:parse_fmt_str(g:taboo_format_renamed)
+    endif
+
+    let label = s:expand_fmt_str(tabnr, label_items)
+
+    return label
 endfunction
 " }}}
 
@@ -144,7 +166,6 @@ function! s:expand_fmt_str(tabnr, items)
     let label = ""
 
     " specific highlighting for the current tab
-    let label .= a:tabnr == active_tabnr ? '%#TabLineSel#' : '%#TabLine#'
     for i in a:items
         if i[0] == s:fmt_char 
             let f = strpart(i, 1)  " remove the fmt_char
