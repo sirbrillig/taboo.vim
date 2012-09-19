@@ -101,25 +101,6 @@ function! TabooTabline()
 endfunction
 " }}}
 
-" TabooGuiTabLabel --------------------------------- {{{
-" Construct a single tab label at once
-"
-function! TabooGuiTabLabel()
-    let label = ""
-    let tabnr = v:lnum
-
-    let t = get(s:tabs, tabnr)
-    if empty(t)  " not renamed
-        let label_items = s:parse_fmt_str(g:taboo_format)
-    else
-        let label_items = s:parse_fmt_str(g:taboo_format_renamed)
-    endif
-    let label = s:expand_fmt_str(tabnr, label_items)
-
-    return label
-endfunction  
-" }}}
-
 " parse_fmt_str --------------------------------- {{{
 " To parse the format string and return a list of tokens, where a token is
 " a single character or a flag such as %f or %2a
@@ -363,11 +344,12 @@ function! s:update_tabs()
 
     " detect if a tab has been closed. If so delete it from the tab list and 
     " update all others tab
-    let cond = s:last_number_of_tabs > tabpagenr('$')
-    if !empty(s:staging_tab) && cond
+    let s:cond = s:last_number_of_tabs > tabpagenr('$')
+    if s:staging_tab > 0 && s:cond
         call s:shift_to_left_tabs_from(s:staging_tab + 1)
         call s:remove_tab(max(keys(s:tabs)))
     endif
+    let s:staging_tab = 0
     let s:last_number_of_tabs = tabpagenr('$')
 endfunction
 
@@ -385,8 +367,6 @@ command! -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
 command! -nargs=0 TabooRenameTabPrompt call s:RenameTabPrompt()
 command! -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
 command! -nargs=0 TabooResetName call s:ResetTabName()
-command! Test echo s:tabs
-
 
 " MAPPINGS
 " =============================================================================
