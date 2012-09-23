@@ -31,10 +31,10 @@ let g:taboo_enable_mappings = 0
 To set your own mappings, refer to the following available commands:
 
 * `TabooRenameTab <arg>`: Renames the current tab with the name provided.
-* `TabooRenameTabPrompt`: As above but ask for the name via prompt. 
+* `TabooRenameTabPrompt`: As above but asks for the name via prompt. 
 * `TabooOpenTab <arg>`: Opens a new tab and and gives it the name provided. 
-* `TabooOpenTabPrompt`: As above but ask for the name via prompt.
-* `TabooResetName`: Remove the custom label associated with the current tab.
+* `TabooOpenTabPrompt`: As above but asks for the name via prompt.
+* `TabooResetName`: Removes the custom label associated with the current tab.
 
 
 ### Settings
@@ -50,13 +50,13 @@ To set your own mappings, refer to the following available commands:
     - `%m`: modified flag
     - `%w`: number of windows opened into the tab
 
-    default: %f%m 
+    default: `%f%m` 
 
     **NOTE**: in renamed tabs, the items `%f`, `%F`, `%a` and `%[n]a` will be avaluated to the custom label associated to that tab.
 
 * `g:taboo_format_renamed`: Same as `g:taboo_format` but for renamed tabs.
 
-    default: [%f]%m 
+    default: `[%f]%m` 
 
 
 For other commands and settings type `:help taboo.txt`
