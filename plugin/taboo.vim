@@ -3,7 +3,7 @@
 " Description: A little plugin for managing tabs in terminal vim  
 " Mantainer: Giacomo Comitti (https://github.com/gcmt)
 " Url: https://github.com/gcmt/taboo.vim
-" Last Changed: 19 Sep 2012
+" Last Changed: 23 Sep 2012
 " Version: 0.1.0
 " =============================================================================
 
@@ -18,23 +18,11 @@ let g:loaded_taboo = 1
 
 " Initialize private variables ------------------ {{{
 
-" where all tabs are stored
-if !exists("s:tabs")
-    let s:tabs = {}
-endif
-
 " the special character used to recognize a special flags in the format string
 if !exists("s:fmt_char")
     let s:fmt_char = '%'
 endif
 
-if !exists("s:last_number_of_tabs")
-    let s:last_number_of_tabs = tabpagenr()
-endif
-
-if !exists("s:staging_tab")
-    let s:staging_tab = 0
-endif
 " }}}
 
 " Initialize default settings ------------------- {{{
@@ -81,8 +69,8 @@ function! TabooTabline()
     let tabln = ''
     for i in range(1, tabpagenr('$'))
 
-        let tab = get(s:tabs, i)
-        if empty(tab)  " not renamed
+        let label = gettabvar(i, 'tab_label')
+        if empty(label)  " not renamed
             let label_items = s:parse_fmt_str(g:taboo_format)
         else
             let label_items = s:parse_fmt_str(g:taboo_format_renamed)
@@ -193,7 +181,7 @@ function! s:expand_path(flag, tabnr, last_active_buf)
     let bn = bufname(a:last_active_buf)
     let file_path = fnamemodify(bn, ':p:t')
     let abs_path = fnamemodify(bn, ':p:h')
-    let label = get(s:tabs, a:tabnr)
+    let label = gettabvar(a:tabnr, 'tab_label')
 
     if empty(label) " not renamed tab
         if empty(file_path)
@@ -230,14 +218,14 @@ endfunction
 " }}}
 
 
-" COMMANDS FUNCTIONS
+" INTERFACE COMMANDS FUNCTIONS 
 " =============================================================================
 
 " rename tab ------------------------------------ {{{
 " To rename the current tab.
 "
 function! s:RenameTab(label)
-    call s:add_tab(tabpagenr(), a:label) " TODO: change the name in raname_tab ?
+    let t:tab_label = a:label
     call s:tabline_refresh()
 endfunction
 
@@ -245,7 +233,6 @@ function! s:RenameTabPrompt()
     let label = s:strip(input("New label: "))
     call s:RenameTab(label)
 endfunction
-
 " }}}
 
 " open new tab ---------------------------------- {{{
@@ -253,7 +240,7 @@ endfunction
 "
 function! s:OpenNewTab(label)
     exec "tabe! " . (g:taboo_open_empty_tab ? '' : '%') 
-    call s:add_tab(tabpagenr(), a:label)
+    let t:tab_label = a:label
     call s:tabline_refresh()
 endfunction
 
@@ -267,9 +254,7 @@ endfunction
 " If the tab has been renamed the custom label is removed.
 "
 function! s:ResetTabName()
-    call s:remove_tab(tabpagenr())
-    call s:add_tab(tabpagenr(), '')
-    "refresh tabline
+    call s:reset_tab(tabpagenr())
     call s:tabline_refresh()
 endfunction
 " }}}
@@ -278,15 +263,20 @@ endfunction
 " HELPER FUNCTIONS
 " =============================================================================
 
-" remove_tab ------------------------------------ {{{
-function! s:remove_tab(tabnr)
-    unlet s:tabs[a:tabnr]
+" reset_tab ------------------------------------- {{{
+function! s:reset_tab(tabnr)
+    let t:tab_label = ""
 endfunction
 " }}}
 
 " add_tab --------------------------------------- {{{
-function! s:add_tab(tabnr, label)
-    let s:tabs[a:tabnr] = a:label
+function! s:add_curr_tab()
+    if !exists("t:tab_number")
+        let t:tab_number = tabpagenr()
+    endif
+    if !exists("t:tab_label")
+        let t:tab_label = ""
+    endif
 endfunction                    
 " }}}
 
@@ -303,64 +293,6 @@ endfunction
 function! s:tabline_refresh()
     exec "set showtabline=" . &showtabline 
 endfunction!
-" }}}
-
-" shift_to_left_tabs_from ----------------------- {{{
-" To update the tab list when a tab at any position is closed. When a tab is
-" closed, all tabs on its right gets shifted to fill the old tab position. This
-" function ensure this update in the state of the tabline gets reflected also
-" in the tab list owned by the taboo plugin. 
-"
-function! s:shift_to_left_tabs_from(currtab)
-    let r_tabs = filter(keys(s:tabs), 'v:val >= ' . a:currtab)
-    for i in r_tabs 
-        let t = get(s:tabs, i)
-        let s:tabs[i-1] = t
-    endfor
-endfunction
-" }}}
-
-" stage_tab_for_closing ------------------------- {{{
-" This function is triggered on the TabLeave event. This function suppose the
-" tab is going to be closed since we leave it so it saves it in a special
-" variable. The tab is not already removed. 
-" For the next step see s:update_tabs()
-"
-function! s:stage_tab_for_closing(tabnr)
-    let s:staging_tab = a:tabnr
-endfunction
-" }}}
-
-" update_tabs ----------------------------------- {{{
-" To add a tab whenever it is created and to delete a tabs if it is remove.
-"
-function! s:update_tabs()
-    let t = get(s:tabs, tabpagenr(), "")
-    if empty(t)
-        call s:add_tab(tabpagenr(), '')
-    endif
-
-    " detect if a tab has been closed. If so delete it from the tab list and 
-    " update all others tab. In macVim, when i close a tab and this function
-    " is triggered by the TabEnter or WinEnter events, tabpagenr('$') does
-    " not decrease by one as expected but retains the value of the state 
-    " where the tab was still opened. It seems that these events are not
-    " triggered when a tab is closed. In terminal vim these events are
-    " triggered as expected.
-    "
-    " 
-    " If the number of tabs has drecreased and we have in memory a 
-    " tabs previously staged for closing (see stage_tab_for_closing())
-    " we can assume that is the tab that has been closed
-    "
-    let something_closed = s:last_number_of_tabs > tabpagenr('$')
-    if s:staging_tab > 0 && something_closed
-        call s:shift_to_left_tabs_from(s:staging_tab + 1)
-        call s:remove_tab(max(keys(s:tabs)))
-    endif
-    let s:staging_tab = 0
-    let s:last_number_of_tabs = tabpagenr('$')
-endfunction
 " }}}
 
 
@@ -387,10 +319,7 @@ endif
 " =============================================================================
 
 augroup taboo
-    " when I enter vim the TabEnter event is not triggered
-    au VimEnter * call s:update_tabs()
-    au TabEnter * call s:update_tabs() 
-    au TabLeave * call s:stage_tab_for_closing(tabpagenr()) 
+    au TabEnter * call s:add_curr_tab() 
 augroup END
 
 
