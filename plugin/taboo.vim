@@ -271,9 +271,6 @@ endfunction
 
 " add_tab --------------------------------------- {{{
 function! s:add_curr_tab()
-    if !exists("t:tab_number")
-        let t:tab_number = tabpagenr()
-    endif
     if !exists("t:tab_label")
         let t:tab_label = ""
     endif
