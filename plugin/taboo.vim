@@ -3,8 +3,9 @@
 " Description: A little plugin for managing tabs in terminal vim  
 " Mantainer: Giacomo Comitti (https://github.com/gcmt)
 " Url: https://github.com/gcmt/taboo.vim
-" Last Changed: 23 Sep 2012
+" License: MIT
 " Version: 0.1.0
+" Last Changed: 23 Sep 2012
 " =============================================================================
 
 " Init ------------------------------------------ {{{
