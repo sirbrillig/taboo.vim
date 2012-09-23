@@ -137,13 +137,13 @@ displayed. Below all the available items that can be used:
    %m -> modified flag
    %w -> number of windows opened into the tab
 
-default: "%n %f%m"
+default: " %f%m "
 
 
 g:taboo_format_renamed                                *g:taboo_format_renamed* 
 Same as |g:taboo_format| but for renamed tabs.
 
-default: "%n [%f]%m
+default: " [%f]%m "
 
 
 6:taboo_modified_flag                                  *g:taboo_modified_flag* 
