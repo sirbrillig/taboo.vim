@@ -32,18 +32,22 @@ let g:taboo_enable_mappings = 0
 
 * `g:taboo_format`: With this option you can customize the way normal tabs (not renamed tabs) are displayed. Below all the available items that can be used: 
 
-    - `%f`: file name in normal tab
+    - `%f`: file name
     - `%F`: path relative to $HOME
     - `%a`: absolute path
     - `%[n]a` : custom level of path depth
     - `%n`: show tab number only on the active tab
     - `%N`: show always tab number
     - `%m`: modified flag
-    - `%w`: number of windows opened into the tab  
+    - `%w`: number of windows opened into the tab
+
+    default: %f%m 
 
     **NOTE**: in renamed tabs, the items `%f`, `%F`, `%a` and `%[n]a` will be avaluated to the custom label associated to that tab.
 
 * `g:taboo_format_renamed`: Same as `g:taboo_format` but for renamed tabs.
+
+    default: [%f]%m 
 
 
 For other commands and settings type `:help taboo.txt`
