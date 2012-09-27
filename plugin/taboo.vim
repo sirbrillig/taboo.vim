@@ -10,7 +10,7 @@
 
 " Init ------------------------------------------ {{{
 
-if exists("g:loaded_taboo") || &cp || has("gui_running") || v:version < 700
+if exists("g:loaded_taboo") || &cp || has("gui_running") || v:version < 703
     finish
 endif
 let g:loaded_taboo = 1
@@ -302,6 +302,7 @@ command! -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
 command! -nargs=0 TabooRenameTabPrompt call s:RenameTabPrompt()
 command! -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
 command! -nargs=0 TabooResetName call s:ResetTabName()
+
 
 " MAPPINGS
 " =============================================================================
