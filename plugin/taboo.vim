@@ -15,6 +15,9 @@ if exists("g:loaded_taboo") || &cp || v:version < 703
 endif
 let g:loaded_taboo = 1
 
+exec "set tabline=%!TabooTabline()"
+exec "set guitablabel=%{TabooGuiLabel()}"
+
 " }}}
 
 " Initialize private variables ------------------ {{{
