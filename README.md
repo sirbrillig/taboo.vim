@@ -2,7 +2,7 @@
 
 **v0.1.1**
 
-Taboo is a simple plugin for easily cutomize and rename tabs in vim. 
+Taboo is a simple plugin for easily customize and rename tabs in vim. 
 
 
 ### Installation
@@ -10,22 +10,6 @@ Taboo is a simple plugin for easily cutomize and rename tabs in vim.
 Vim version 7.3 is required.
 
 Install into `.vim/plugin/taboo.vim` or better, use Pathogen.
-
-To complete the installation be sure to add the following lines to your `.vimrc` file:
-
-Set the following lines to support terminal vim:
-
-```
-set tabline=%!TabooTabline()
-set showtabline=1   " set to 2 if you want the tabline to always be visible
-```
-
-
-Set the following line to support Gui versions of vim:
-
-```
-set guitablabel=%{TabooGuiLabel()}
-```
 
 **NOTE**: tabs look different in terminal vim than in gui versions. If you wish
 having terminal style tabs even in gui versions you have to add the following
@@ -85,5 +69,5 @@ For other commands and settings type `:help taboo.txt`
 
 ### Changelog
 
-* **v0.1.1**: added gui support
+* **v0.1.1**: added gui support and simplified installation
 * **v0.1.0**: first stable release
