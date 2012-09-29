@@ -1,5 +1,7 @@
 ## Taboo.vim
 
+**v0.1.1**
+
 Taboo is a simple plugin for easily cutomize and rename tabs in vim. 
 
 
@@ -26,8 +28,8 @@ set guitablabel=%{TabooGuiLabel()}
 ```
 
 **NOTE**: tabs look different in terminal vim than in gui versions. If you wish
-having terminal style tabs even in the gui version you have to add the
-following line to your .vimrc file:  
+having terminal style tabs even in gui versions you have to add the following
+line to your .vimrc file:  
 
 ```
 set guioptions-=e
@@ -78,5 +80,10 @@ To set your own mappings, refer to the following available commands:
 
     default: `[%f]%m` 
 
-
 For other commands and settings type `:help taboo.txt`
+
+
+### Changelog
+
+* **v0.1.1**: added gui support
+* **v0.1.0**: first stable release
