@@ -81,7 +81,7 @@ function! TabooTabline()
         let tabln .= i == tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
         let tabln .= s:expand_fmt_str(i, label_items)
     endfor
-     
+
     let tabln .= '%#TabLineFill#'
     let tabln .= '%=%#TabLine#%999X' . g:taboo_close_label
 
