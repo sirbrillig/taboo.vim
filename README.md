@@ -2,7 +2,7 @@
 
 **v0.1.1**
 
-Taboo is a simple plugin for easily customize and rename tabs in vim. 
+Taboo is a simple plugin for easily customize and rename tabs in vim.
 
 
 ### Installation
@@ -27,7 +27,7 @@ set guioptions-=e
 * `<leader>tr`: Reset the tab name to its default.
 
 
-Set the following if you want prevent the plugin to set these mappings for you:
+Set the following if you want to prevent the plugin to set mappings for you:
 
 ```
 let g:taboo_enable_mappings = 0
@@ -45,7 +45,7 @@ To set your own mappings, refer to the following available commands:
 ### Settings
 
 * `g:taboo_format`: With this option you can customize the way normal tabs (not
-  renamed tabs) are displayed. Below all the available items that can be used: 
+  renamed tabs) are displayed. Below all the available items: 
 
     - `%f`: file name
     - `%F`: path relative to $HOME
@@ -64,7 +64,7 @@ To set your own mappings, refer to the following available commands:
 
     default: `[%f]%m` 
 
-For other commands and settings type `:help taboo.txt`
+For other available settings type `:help taboo`
 
 
 ### Changelog
