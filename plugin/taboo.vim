@@ -5,7 +5,7 @@
 " Url: https://github.com/gcmt/taboo.vim
 " License: MIT
 " Version: 0.1.1
-" Last Changed: 29 Sep 2012
+" Last Changed: 6 Oct 2012
 " =============================================================================
 
 " Init ------------------------------------------ {{{
@@ -49,10 +49,6 @@ endif
 if !exists("g:taboo_unnamed_label")
     let g:taboo_unnamed_label = '[no name]'
 endif    
-
-if !exists("g:taboo_enable_mappings")
-    let g:taboo_enable_mappings = 1
-endif           
  
 if !exists("g:taboo_open_empty_tab")
     let g:taboo_open_empty_tab= 1
@@ -319,16 +315,6 @@ command! -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
 command! -nargs=0 TabooRenameTabPrompt call s:RenameTabPrompt()
 command! -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
 command! -nargs=0 TabooResetName call s:ResetTabName()
-
-
-" MAPPINGS
-" =============================================================================
-
-if g:taboo_enable_mappings
-    nnoremap <silent> <leader>tt :TabooRenameTabPrompt<CR>
-    nnoremap <silent> <leader>to :TabooOpenTabPrompt<CR>
-    nnoremap <silent> <leader>tr :TabooResetName<CR>
-endif
 
 
 " AUTOCOMMANDS

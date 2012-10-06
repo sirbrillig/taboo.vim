@@ -20,20 +20,9 @@ set guioptions-=e
 ```
 
 
-### Mappings
+### Commands
 
-* `<leader>tt`: Rename the current tab.
-* `<leader>to`: Open a new tab and ask for its name.
-* `<leader>tr`: Reset the tab name to its default.
-
-
-Set the following if you want to prevent the plugin to set mappings for you:
-
-```
-let g:taboo_enable_mappings = 0
-```
-
-To set your own mappings, refer to the following available commands:
+Below all the available commands:
 
 * `TabooRenameTab <arg>`: Renames the current tab with the name provided.
 * `TabooRenameTabPrompt`: As above but asks for the name via prompt. 
