@@ -24,9 +24,9 @@ set guioptions-=e
 
 Below all the available commands:
 
-* `TabooRenameTab <arg>`: Renames the current tab with the name provided.
+* `TabooRenameTab <name>`: Renames the current tab with the name provided.
 * `TabooRenameTabPrompt`: As above but asks for the name via prompt. 
-* `TabooOpenTab <arg>`: Opens a new tab and and gives it the name provided. 
+* `TabooOpenTab <name>`: Opens a new tab and and gives it the name provided. 
 * `TabooOpenTabPrompt`: As above but asks for the name via prompt.
 * `TabooResetName`: Removes the custom label associated with the current tab.
 
