@@ -1,13 +1,13 @@
 ## Taboo.vim
 
-**v0.1.1**
+**v0.1.2**
 
 Taboo is a simple plugin for easily customize and rename tabs in vim.
 
 
 ### Installation
 
-Vim version 7.3 is required.
+Vim 7.3+ is required.
 
 Install into `.vim/plugin/taboo.vim` or better, use Pathogen.
 
@@ -25,9 +25,7 @@ set guioptions-=e
 Below all the available commands:
 
 * `TabooRenameTab <name>`: Renames the current tab with the name provided.
-* `TabooRenameTabPrompt`: As above but asks for the name via prompt. 
 * `TabooOpenTab <name>`: Opens a new tab and and gives it the name provided. 
-* `TabooOpenTabPrompt`: As above but asks for the name via prompt.
 * `TabooResetName`: Removes the custom label associated with the current tab.
 
 
@@ -58,5 +56,6 @@ For other available settings type `:help taboo`
 
 ### Changelog
 
+* **v0.1.2**: removed superfluous commands TabooOpenTabPrompt and TabooRenameTabPrompt
 * **v0.1.1**: added gui support and simplified installation
 * **v0.1.0**: first stable release

@@ -4,8 +4,8 @@
 " Mantainer: Giacomo Comitti (https://github.com/gcmt)
 " Url: https://github.com/gcmt/taboo.vim
 " License: MIT
-" Version: 0.1.1
-" Last Changed: 6 Oct 2012
+" Version: 0.1.2
+" Last Changed: 12 Nov 2012
 " =============================================================================
 
 " Init ------------------------------------------ {{{
@@ -232,7 +232,7 @@ endfunction
 " }}}
 
 
-" INTERFACE COMMANDS FUNCTIONS 
+" INTERFACE FUNCTIONS 
 " =============================================================================
 
 " rename tab ------------------------------------ {{{
@@ -241,11 +241,6 @@ endfunction
 function! s:RenameTab(label)
     let t:tab_label = a:label
     call s:tabline_refresh()
-endfunction
-
-function! s:RenameTabPrompt()
-    let label = s:strip(input("New label: "))
-    call s:RenameTab(label)
 endfunction
 " }}}
 
@@ -256,11 +251,6 @@ function! s:OpenNewTab(label)
     exec "tabe! " . (g:taboo_open_empty_tab ? '' : '%') 
     let t:tab_label = a:label
     call s:tabline_refresh()
-endfunction
-
-function! s:OpenNewTabPrompt()
-    let label = s:strip(input("Tab label: "))
-    call s:OpenNewTab(label)
 endfunction
 " }}}
 
@@ -312,8 +302,6 @@ endfunction!
 
 command! -nargs=1 TabooRenameTab call s:RenameTab(<q-args>)
 command! -nargs=1 TabooOpenTab call s:OpenNewTab(<q-args>)
-command! -nargs=0 TabooRenameTabPrompt call s:RenameTabPrompt()
-command! -nargs=0 TabooOpenTabPrompt call s:OpenNewTabPrompt()
 command! -nargs=0 TabooResetName call s:ResetTabName()
 
 

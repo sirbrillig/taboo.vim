@@ -3,6 +3,7 @@
 
                                    Taboo
                  manage and rename your tabs in terminal vim
+                                   v1.2
 
                                      ~
                               Reference Manual
@@ -56,19 +57,11 @@ TabooRenameTab <name>                                         *TabooRenameTab*
 To rename the current tab. An argument (the new tab name) is required.
     
 
-TabooRenameTabPrompt                                    *TabooRenameTabPrompt* 
-
-To rename the current tab. A prompt will open to ask for the new tab name.
-
 
 TabooOpenTab <name>                                             *TabooOpenTab*
 
 To open a new tab next to active. An argument (the tab name) is required.
 
-
-TabooOpenTabPrompt                                        *TabooOpenTabPrompt*
-
-To open a new tab next to active. A prompt will open to ask for the tab name.
 
 
 TabooResetTabName                                          *TabooResetTabName*
@@ -145,6 +138,10 @@ default: "[no name]"
 
 ==============================================================================
 5. Changelog                                                 *taboo-changelog*
+
+* v0.1.2: removed superfluous commands TabooOpenTabPrompt and TabooRenameTabPrompt
+* v0.1.1: added gui support and simplified installation
+* v0.1.0: first stable release
 
 
 ==============================================================================
