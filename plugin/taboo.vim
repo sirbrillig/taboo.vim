@@ -4,8 +4,8 @@
 " Mantainer: Giacomo Comitti (https://github.com/gcmt)
 " Url: https://github.com/gcmt/taboo.vim
 " License: MIT
-" Version: 0.1.2
-" Last Changed: 12 Nov 2012
+" Version: 1.3
+" Last Changed: 13 gen 2013 
 " =============================================================================
 
 " Init ------------------------------------------ {{{
@@ -30,23 +30,23 @@ endif
 " Initialize default settings ------------------- {{{
 "
 " :help taboo.txt for format items
-if !exists("g:taboo_format")
+if !exists("g:taboo_tab_format")
     let g:taboo_format = " %f%m "
 endif
 
-if !exists("g:taboo_format_renamed")
+if !exists("g:taboo_renamed_tab_format")
     let g:taboo_format_renamed = " [%f]%m "
 endif
 
-if !exists("g:taboo_modified_flag")
+if !exists("g:taboo_modified_tab_flag")
     let g:taboo_modified_flag= "*"
 endif    
 
-if !exists("g:taboo_close_label")
+if !exists("g:taboo_close_tabs_label")
     let g:taboo_close_label = ''
 endif    
 
-if !exists("g:taboo_unnamed_label")
+if !exists("g:taboo_unnamed_tab_label")
     let g:taboo_unnamed_label = '[no name]'
 endif    
  

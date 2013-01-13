@@ -3,7 +3,7 @@
 
                                    Taboo
                  manage and rename your tabs in terminal vim
-                                   v1.2
+                                   v1.3
 
                                      ~
                               Reference Manual
@@ -76,7 +76,7 @@ To reset the tab name to its original name.
 ______________________________________________________________________________
 4.1 General behaviour
 
-g:taboo_open_empty_tab                               *g:taboo_open_empty_tab* 
+g:taboo_open_empty_tab                                *g:taboo_open_empty_tab* 
 If you set this option to 0, whenever you open a new tab Taboo will try to 
 it with the current buffer
 
@@ -85,7 +85,7 @@ default: 1
 ______________________________________________________________________________
 4.2 Tabs UI options
 
-g:taboo_format                                                *g:taboo_format* 
+g:taboo_tab_format                                        *g:taboo_tab_format* 
 With this option you can customize the way normal tabs (not renamed tabs) are
 displayed. Below all the available items that can be used: 
 
@@ -109,19 +109,19 @@ displayed. Below all the available items that can be used:
 default: " %f%m "
 
 
-g:taboo_format_renamed                                *g:taboo_format_renamed* 
+g:taboo_renamed_tab_format                        *g:taboo_renamed_tab_format* 
 Same as |g:taboo_format| but for renamed tabs.
 
 default: " [%f]%m "
 
 
-6:taboo_modified_flag                                  *g:taboo_modified_flag* 
+6:taboo_modified_tab_flag                          *g:taboo_modified_tab_flag* 
 Set this option if you prefer a different string for the modified flag.
 
 default: "*"
 
 
-g:taboo_close_label                                      *g:taboo_close_label* 
+g:taboo_close_tabs_label                            *g:taboo_close_tabs_label* 
 Set this option if you want a flag on the tabline who close the tabline itself 
 when clicked. The flag will appear at the right side of the tabline. This 
 position is fixed. When the value is an empty string nothing will be displaed.
@@ -129,7 +129,7 @@ position is fixed. When the value is an empty string nothing will be displaed.
 default: ''
 
 
-g:taboo_unnamed_label                                  *g:taboo_unnamed_label* 
+g:taboo_unnamed_tab_label                          *g:taboo_unnamed_tab_label* 
 Set this option if you prefer a different name for tabs containing an unnamed
 buffer.
 
@@ -139,9 +139,10 @@ default: "[no name]"
 ==============================================================================
 5. Changelog                                                 *taboo-changelog*
 
-* v0.1.2: removed superfluous commands TabooOpenTabPrompt and TabooRenameTabPrompt
-* v0.1.1: added gui support and simplified installation
-* v0.1.0: first stable release
+* v1.3: some settings have been renamed.
+* v1.2: removed superfluous commands TabooOpenTabPrompt and TabooRenameTabPrompt
+* v1.1: added gui support and simplified installation
+* v1.0: first stable release
 
 
 ==============================================================================
@@ -150,5 +151,3 @@ default: "[no name]"
 Developed by Giacomo Comitti
 
 Git repository: https://github.com/gcmt/taboo.vim
-
-Contributors:

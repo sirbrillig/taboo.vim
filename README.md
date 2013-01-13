@@ -1,6 +1,6 @@
 ## Taboo.vim
 
-**v0.1.2**
+**v1.3**
 
 Taboo is a simple plugin for easily customize and rename tabs in vim.
 
@@ -22,7 +22,7 @@ set guioptions-=e
 
 ### Commands
 
-Below all the available commands:
+Here all the available commands:
 
 * `TabooRenameTab <name>`: Renames the current tab with the name provided.
 * `TabooOpenTab <name>`: Opens a new tab and and gives it the name provided. 
@@ -31,7 +31,9 @@ Below all the available commands:
 
 ### Settings
 
-* `g:taboo_format`: With this option you can customize the way normal tabs (not
+Here the most important available settings:
+
+* `g:taboo_tab_format`: With this option you can customize the way normal tabs (not
   renamed tabs) are displayed. Below all the available items: 
 
     - `%f`: file name
@@ -47,7 +49,7 @@ Below all the available commands:
 
     **NOTE**: in renamed tabs, the items `%f`, `%F`, `%a` and `%[n]a` will be avaluated to the custom label associated to that tab.
 
-* `g:taboo_format_renamed`: Same as `g:taboo_format` but for renamed tabs.
+* `g:taboo_renamed_tab_format`: Same as `g:taboo_format` but for renamed tabs.
 
     default: `[%f]%m` 
 
@@ -56,6 +58,7 @@ For other available settings type `:help taboo`
 
 ### Changelog
 
-* **v0.1.2**: removed superfluous commands TabooOpenTabPrompt and TabooRenameTabPrompt
-* **v0.1.1**: added gui support and simplified installation
-* **v0.1.0**: first stable release
+* **v1.3** some settings have been renamed.
+* **v1.2**: removed superfluous commands TabooOpenTabPrompt and TabooRenameTabPrompt.
+* **v1.1**: added gui support and simplified installation
+* **v1.0**: first stable release
