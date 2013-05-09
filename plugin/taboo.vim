@@ -31,23 +31,23 @@ endif
 "
 " :help taboo.txt for format items
 if !exists("g:taboo_tab_format")
-    let g:taboo_format = " %f%m "
+    let g:taboo_tab_format = " %f%m "
 endif
 
 if !exists("g:taboo_renamed_tab_format")
-    let g:taboo_format_renamed = " [%f]%m "
+    let g:taboo_renamed_tab_format = " [%f]%m "
 endif
 
 if !exists("g:taboo_modified_tab_flag")
-    let g:taboo_modified_flag= "*"
+    let g:taboo_modified_tab_flag= "*"
 endif    
 
 if !exists("g:taboo_close_tabs_label")
-    let g:taboo_close_label = ''
+    let g:taboo_close_tabs_label = ''
 endif    
 
 if !exists("g:taboo_unnamed_tab_label")
-    let g:taboo_unnamed_label = '[no name]'
+    let g:taboo_unnamed_tab_label = '[no name]'
 endif    
  
 if !exists("g:taboo_open_empty_tab")
@@ -69,9 +69,9 @@ function! TabooTabline()
 
         let renamed = gettabvar(i, 'tab_label')
         if empty(renamed)  " not renamed
-            let label_items = s:parse_fmt_str(g:taboo_format)
+            let label_items = s:parse_fmt_str(g:taboo_tab_format)
         else
-            let label_items = s:parse_fmt_str(g:taboo_format_renamed)
+            let label_items = s:parse_fmt_str(g:taboo_renamed_tab_format)
         endif
 
         let tabln .= i == tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
@@ -79,7 +79,7 @@ function! TabooTabline()
     endfor
 
     let tabln .= '%#TabLineFill#'
-    let tabln .= '%=%#TabLine#%999X' . g:taboo_close_label
+    let tabln .= '%=%#TabLine#%999X' . g:taboo_close_tabs_label
 
     return tabln
 endfunction
@@ -91,9 +91,9 @@ function! TabooGuiLabel()
 
     let renamed = gettabvar(v:lnum, 'tab_label')
     if empty(renamed)  " not renamed
-        let label_items = s:parse_fmt_str(g:taboo_format)
+        let label_items = s:parse_fmt_str(g:taboo_tab_format)
     else
-        let label_items = s:parse_fmt_str(g:taboo_format_renamed)
+        let label_items = s:parse_fmt_str(g:taboo_renamed_tabs_label)
     endif
 
     return s:expand_fmt_str(v:lnum, label_items)
@@ -182,7 +182,7 @@ endfunction
 function! s:expand_modified_flag(buflist)
     for b in a:buflist
         if getbufvar(b, "&mod")
-            return g:taboo_modified_flag
+            return g:taboo_modified_tab_flag
         endif
     endfor
     return ''
@@ -199,7 +199,7 @@ function! s:expand_path(flag, tabnr, last_active_buf)
 
     if empty(label) " not renamed tab
         if empty(file_path)
-            let path = g:taboo_unnamed_label
+            let path = g:taboo_unnamed_tab_label
         else   
             let path = ""
             if a:flag ==# "f"
