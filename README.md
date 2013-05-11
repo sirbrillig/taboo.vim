@@ -1,4 +1,4 @@
-## Taboo.vim
+## taboo.vim
 
 **v1.4**
 
