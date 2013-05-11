@@ -1,12 +1,9 @@
-*taboo.txt*    
-*taboo*
+*taboo.txt* *taboo*
 
-                                   Taboo
-                 manage and rename your tabs in terminal vim
-                                   v1.3
-
+                                 Taboo v1.4
                                      ~
                               Reference Manual
+
 
 ==============================================================================
 CONTENTS                                                      *taboo-contents*
@@ -139,10 +136,12 @@ default: "[no name]"
 ==============================================================================
 5. Changelog                                                 *taboo-changelog*
 
-* v1.3: some settings have been renamed.
-* v1.2: removed superfluous commands TabooOpenTabPrompt and TabooRenameTabPrompt
-* v1.1: added gui support and simplified installation
-* v1.0: first stable release
+* v1.4: Added support for sessions. Commands names have been simplified. Minor
+        fixes (thanks to ajpaulson).
+* v1.3: Some settings have been renamed.
+* v1.2: Removed superfluous commands TabooOpenTabPrompt and TabooRenameTabPrompt
+* v1.1: Added gui support and simplified installation
+* v1.0: First stable release
 
 
 ==============================================================================
