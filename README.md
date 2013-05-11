@@ -7,11 +7,13 @@ plugin aims to provide an easy way to manage tab labels mainly in terminal vim
 but it is compatible with gui versions too.
 
 
+### Requirements
+* Vim 7.3+
+
+
 ### Installation
-
-Vim 7.3+ is required.
-
-Install into `.vim/plugin/taboo.vim` or better, use Pathogen.
+You can either extract the content of the folder into the `$HOME/.vim`
+directory or use plugin managers such as Vundle or Pathogen.
 
 **NOTE**: tabs look different in terminal vim than in gui versions. If you wish
 having terminal style tabs even in gui versions you have to add the following
