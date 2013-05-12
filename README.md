@@ -51,7 +51,7 @@ Here the most important available settings:
 
     default: `%f%m` 
 
-    **NOTE**: in renamed tabs, the items `%f`, `%F`, `%a` and `%[n]a` will be avaluated to the custom label associated to that tab.
+    **NOTE**: in renamed tabs, the items `%f`, `%F`, `%a` and `%[n]a` will be evaluated to the custom label associated to that tab.
 
 * `g:taboo_renamed_tab_format`: Same as `g:taboo_tab_format` but for renamed tabs.
 
