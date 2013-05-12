@@ -5,7 +5,7 @@
 " Url: https://github.com/gcmt/taboo.vim
 " License: MIT
 " Version: 1.4
-" Last Changed: May 11, 2013
+" Last Changed: May 12, 2013
 " =============================================================================
 
 
@@ -24,7 +24,7 @@ let g:loaded_taboo = 1
 let s:fmt_char = get(s:, "fmt_char", "%")
 
 " dictionary of the form: {tab_number: label, ..}. This is populated when Vim
-" exits.
+" exits. This is used for restoring custom tab names with sessions.
 let g:Taboo_tabs = get(g:, "Taboo_tabs", "")
 
 " }}}
@@ -47,37 +47,45 @@ let g:taboo_open_empty_tab = get(g:, "taboo_open_empty_tab", 1)
 " TabooTabline ---------------------------------- {{{
 " This function construct the tabline string for terminal vim
 " The whole tabline is constructed at once.
-"
 function! TabooTabline()
-    let tabln = ''
 
-        let label = gettabvar(i, "taboo_tab_label")
-        if empty(label)  " not renamed
+    let tabln = ''  " tabline string
+
     for i in s:tabs()
+
+        let label = gettabvar(i, "taboo_tab_name")
+        if empty(label)
+            " not renamed tab
             let label_items = s:parse_fmt_str(g:taboo_tab_format)
         else
+            " renamed tab
             let label_items = s:parse_fmt_str(g:taboo_renamed_tab_format)
         endif
 
         let tabln .= i == tabpagenr() ? '%#TabLineSel#' : '%#TabLine#'
         let tabln .= s:expand_fmt_str(i, label_items)
+
     endfor
 
     let tabln .= '%#TabLineFill#'
     let tabln .= '%=%#TabLine#%999X' . g:taboo_close_tabs_label
 
     return tabln
+
 endfunction
 " }}}
 
 " TabooGuiLabel --------------------------------- {{{
 " This function construct a single tab label for gui vim
+" This is automatically called by Vim for each tab.
 function! TabooGuiLabel()
 
-    let label = gettabvar(v:lnum, "taboo_tab_label")
-    if empty(label)  " not renamed
+    let label = gettabvar(v:lnum, "taboo_tab_name")
+    if empty(label)
+        " not renamed tab
         let label_items = s:parse_fmt_str(g:taboo_tab_format)
     else
+        " renamed tab
         let label_items = s:parse_fmt_str(g:taboo_renamed_tab_format)
     endif
 
@@ -91,10 +99,11 @@ endfunction
 " a single character or a flag such as %f or %2a
 " Example:
 "   parse_fmt_str("%n %tab") -> ['%n', ' ', '%', 't', 'a', 'b']
-"
 function! s:parse_fmt_str(str)
+
     let tokens = []
     let i = 0
+
     while i < strlen(a:str)
         let pos = match(a:str, s:fmt_char . '\(f\|F\|\d\?a\|n\|N\|m\|w\)', i)
         if pos < 0
@@ -115,13 +124,13 @@ function! s:parse_fmt_str(str)
     endwhile
 
     return tokens
+
 endfunction
 " }}}
 
 " expand_fmt_str -------------------------------- {{{
 " To expand flags contained in the `items` list of tokes into their respective
 " meanings.
-"
 function! s:expand_fmt_str(tabnr, items)
 
     let buflist = tabpagebuflist(a:tabnr)
@@ -131,30 +140,33 @@ function! s:expand_fmt_str(tabnr, items)
 
     " specific highlighting for the current tab
     for i in a:items
+
         if i[0] == s:fmt_char
-            let f = strpart(i, 1)  " remove the fmt_char
+            let f = strpart(i, 1) " remove fmt_char from the string
             if f ==# "m"
                 let label .= s:expand_modified_flag(buflist)
             elseif f == "f" || f ==# "a" || match(f, "[0-9]a") == 0
                 let label .= s:expand_path(f, a:tabnr, last_active_buf)
-            elseif f == "n" " note: == -> case insensitive comparison
-                let label .= s:expand_tab_number(f, a:tabnr, tabpagenr())
+            elseif f == "n" " note: == performs case insensitive comparison
+                let label .= s:expand_tab_number(f, a:tabnr)
             elseif f ==# "w"
                 let label .= tabpagewinnr(a:tabnr, '$')
             endif
         else
             let label .= i
         endif
+
     endfor
+
     return label
+
 endfunction
 " }}}
 
 " expand_tab_number ----------------------------- {{{
-"
-function! s:expand_tab_number(flag, tabnr, active_tabnr)
+function! s:expand_tab_number(flag, tabnr)
     if a:flag ==# "n" " ==# : case sensitive comparison
-        return a:tabnr == a:active_tabnr ? a:tabnr : ''
+        return a:tabnr == tabpagenr() ? a:tabnr : ''
     else
         return a:tabnr
     endif
@@ -162,7 +174,6 @@ endfunction
 " }}}
 
 " expand_modified_flag -------------------------- {{{
-"
 function! s:expand_modified_flag(buflist)
     for b in a:buflist
         if getbufvar(b, "&mod")
@@ -174,7 +185,6 @@ endfunction
 " }}}
 
 " expand_path ----------------------------------- {{{
-"
 function! s:expand_path(flag, tabnr, last_active_buf)
 
     let bn = bufname(a:last_active_buf)
@@ -220,6 +230,7 @@ function! s:expand_path(flag, tabnr, last_active_buf)
     endif
 
     return path
+
 endfunction
 " }}}
 
@@ -230,7 +241,7 @@ endfunction
 " rename tab ------------------------------------ {{{
 " To rename the current tab.
 function! s:RenameTab(label)
-    call settabvar(tabpagenr(), "taboo_tab_label", a:label)
+    let t:taboo_tab_name = a:label
     call s:refresh_tabline()
 endfunction
 " }}}
@@ -244,9 +255,9 @@ endfunction
 " }}}
 
 " reset tab name -------------------------------- {{{
-" If the tab has been renamed the custom label is removed.
+" If the tab has been renamed the custom name is removed.
 function! s:ResetTabName()
-    call settabvar(tabpagenr(), "taboo_tab_label", "")
+    let t:taboo_tab_name = ""
     call s:refresh_tabline()
 endfunction
 " }}}
@@ -267,9 +278,9 @@ function! s:refresh_tabline()
         return
     endif
     let g:Taboo_tabs = ""
-        if !empty(gettabvar(i, "taboo_tab_label"))
-            let g:Taboo_tabs .= i."\t".gettabvar(i, "taboo_tab_label")."\n"
     for i in s:tabs()
+        if !empty(gettabvar(i, "taboo_tab_name"))
+            let g:Taboo_tabs .= i."\t".gettabvar(i, "taboo_tab_name")."\n"
         endif
     endfor
     exec "set showtabline=" . &showtabline
@@ -277,10 +288,10 @@ endfunction!
 " }}}
 
 " extract_tabs_from_str {{{
-function! s:extract_tabs_from_str()
+function! s:extract_tabs_from_str(str)
     let tabs = {}
-    let l = split(get(g:, "Taboo_tabs", ""), "\n")
-    for ln in l
+    let lines = split(a:str, "\n")
+    for ln in lines
         let tokens = split(ln, "\t")
         let tabs[tokens[0]] = tokens[1]
     endfor
@@ -291,8 +302,7 @@ endfunction
 " restore_tabs {{{
 function! s:restore_tabs()
     if !empty(g:Taboo_tabs)
-        let tabs = s:extract_tabs_from_str()
-            call settabvar(i, "taboo_tab_label", get(tabs, i, ""))
+        let tabs = s:extract_tabs_from_str(get(g:, "Taboo_tabs", ""))
         for i in s:tabs()
             call settabvar(i, "taboo_tab_name", get(tabs, i, ""))
         endfor
