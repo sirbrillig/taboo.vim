@@ -50,10 +50,10 @@ let g:taboo_open_empty_tab = get(g:, "taboo_open_empty_tab", 1)
 "
 function! TabooTabline()
     let tabln = ''
-    for i in range(1, tabpagenr('$'))
 
         let label = gettabvar(i, "taboo_tab_label")
         if empty(label)  " not renamed
+    for i in s:tabs()
             let label_items = s:parse_fmt_str(g:taboo_tab_format)
         else
             let label_items = s:parse_fmt_str(g:taboo_renamed_tab_format)
@@ -248,6 +248,9 @@ endfunction
 " HELPER FUNCTIONS
 " =============================================================================
 
+" tabs {{{
+function! s:tabs()
+    return range(1, tabpagenr('$'))
 endfunction
 " }}}
 
@@ -257,9 +260,9 @@ function! s:refresh_tabline()
         return
     endif
     let g:Taboo_tabs = ""
-    for i in range(1, tabpagenr("$"))
         if !empty(gettabvar(i, "taboo_tab_label"))
             let g:Taboo_tabs .= i."\t".gettabvar(i, "taboo_tab_label")."\n"
+    for i in s:tabs()
         endif
     endfor
     exec "set showtabline=" . &showtabline
@@ -282,8 +285,9 @@ endfunction
 function! s:restore_tabs()
     if !empty(g:Taboo_tabs)
         let tabs = s:extract_tabs_from_str()
-        for i in range(1, tabpagenr('$'))
             call settabvar(i, "taboo_tab_label", get(tabs, i, ""))
+        for i in s:tabs()
+            call settabvar(i, "taboo_tab_name", get(tabs, i, ""))
         endfor
     endif
 endfunction
