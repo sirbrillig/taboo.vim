@@ -178,33 +178,40 @@ endfunction
 function! s:expand_path(flag, tabnr, last_active_buf)
 
     let bn = bufname(a:last_active_buf)
-    let file_path = fnamemodify(bn, ':p:t')
-    let abs_path = fnamemodify(bn, ':p:h')
-    let label = gettabvar(a:tabnr, 'taboo_tab_label')
+    let fname = fnamemodify(bn, ':p:t')
+    let basedir = fnamemodify(bn, ':p:h')
+    let label = gettabvar(a:tabnr, 'taboo_tab_name')
 
-    if empty(label) " not renamed tab
-        if empty(file_path)
+    if empty(label)
+        " not renamed tab
+        if empty(fname)
+            " unnamed buffer, usually an empty brand new buffer
             let path = g:taboo_unnamed_tab_label
         else
             let path = ""
             if a:flag ==# "f"
-                let path = file_path
+                " just the file name
+                let path = fname
             elseif a:flag ==# "F"
-                let path = substitute(abs_path . '/', $HOME, '', '')
-                let path = "~" . path . file_path
+                " path relative to $HOME (if possible)
+                let path = substitute(basedir, $HOME, '~', '')
+                let path = path . fname
             elseif a:flag ==# "a"
-                let path = abs_path . "/" . file_path
-            elseif match(a:flag, "%[0-9]a") == 0
-                let n = a:flag[1]
-                let path_tokens = split(abs_path . "/" . file_path, "/")
-                let depth = n > len(path_tokens) ? len(path_tokens) : n
-                let path = ""
-                for i in range(len(path_tokens))
-                    let k = len(path_tokens) - n
-                    if i >= k
-                        let path .= (i > k ? '/' : '') . path_tokens[i]
+                " absolute path
+                let path = basedir . "/" . fname
+            elseif match(a:flag, "[0-9]a") == 0
+                " custom level of path depth
+                let path = substitute(basedir, $HOME, '~', '')
+                let path_tokens = split(path, "/")
+                let _path = []
+                let n = a:flag[0] > len(path_tokens) ? len(path_tokens) : a:flag[0]
+                for t in reverse(path_tokens)
+                    if n > 0
+                        let _path = insert(_path, t, 0)
                     endif
+                    let n -= 1
                 endfor
+                let path = join(_path, "/") . "/" . fname
             endif
         endif
     else
