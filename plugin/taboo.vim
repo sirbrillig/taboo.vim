@@ -248,9 +248,6 @@ endfunction
 " HELPER FUNCTIONS
 " =============================================================================
 
-" strip ----------------------------------------- {{{
-function! s:strip(str)
-    return substitute(a:str, '^\s*\(.\{-}\)\s*$', '\1', '')
 endfunction
 " }}}
 
