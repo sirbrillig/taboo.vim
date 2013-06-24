@@ -1,0 +1,25 @@
+
+# CHANGELOG
+
+v1.4
+
+	- Add support for sessions. 
+	- Simplify command names.
+	- Minor fixes (thanks to ajpaulson). 
+
+v1.3
+
+	- Rename some settings.
+
+v1.2
+
+	- Remove superfluous commands TabooOpenTabPrompt and TabooRenameTabPrompt.
+
+v1.1
+
+	- Add gui support.
+	- Simplify installation.
+
+v1.0
+
+	- First stable release.  

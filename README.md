@@ -58,12 +58,3 @@ Here the most important available settings:
     default: `[%f]%m` 
 
 For other available settings type `:help taboo`
-
-
-### Changelog
-
-* **v1.4** Added support for sessions. Commands names have been simplified. Minor fixes (thanks to ajpaulson).  
-* **v1.3** Some settings have been renamed.
-* **v1.2** Removed superfluous commands TabooOpenTabPrompt and TabooRenameTabPrompt.
-* **v1.1** Added gui support and simplified installation
-* **v1.0** First stable release
