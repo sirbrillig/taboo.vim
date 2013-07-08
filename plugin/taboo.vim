@@ -20,11 +20,7 @@ let g:loaded_taboo = 1
 
 " Initialize internal variables ------------------ {{{
 
-" the special character used to recognize a special flags in the format string
-let s:fmt_char = get(s:, "fmt_char", "%")
-
-" dictionary of the form: {tab_number: label, ..}. This is populated when Vim
-" exits. This is used for restoring custom tab names with sessions.
+" wher custom tab names get stored (format: 'TABNUM\tTABNAME\n ...')
 let g:Taboo_tabs = get(g:, "Taboo_tabs", "")
 
 " }}}
@@ -41,7 +37,7 @@ let g:taboo_open_empty_tab = get(g:, "taboo_open_empty_tab", 1)
 " }}}
 
 
-" CONSTRUCT THE TABLINE
+" FUNCTIONS FOR CONSTRUCTING THE TABLINE
 " =============================================================================
 
 " TabooTabline ---------------------------------- {{{
@@ -105,7 +101,7 @@ function! s:parse_fmt_str(str)
     let i = 0
 
     while i < strlen(a:str)
-        let pos = match(a:str, s:fmt_char . '\(f\|F\|\d\?a\|n\|N\|m\|w\)', i)
+        let pos = match(a:str, "%" . '\(f\|F\|\d\?a\|n\|N\|m\|w\)', i)
         if pos < 0
             call extend(tokens, split(strpart(a:str, i, strlen(a:str) - i), '\zs'))
             let i = strlen(a:str)
@@ -141,8 +137,8 @@ function! s:expand_fmt_str(tabnr, items)
     " specific highlighting for the current tab
     for i in a:items
 
-        if i[0] == s:fmt_char
-            let f = strpart(i, 1) " remove fmt_char from the string
+        if i[0] == "%"
+            let f = strpart(i, 1) " remove the '%' charater from the string
             if f ==# "m"
                 let label .= s:expand_modified_flag(buflist)
             elseif f == "f" || f ==# "a" || match(f, "[0-9]a") == 0
