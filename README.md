@@ -43,7 +43,7 @@ Here the most important available settings:
     - `%f`: file name
     - `%F`: path relative to $HOME
     - `%a`: absolute path
-    - `%[n]a` : custom level of path depth
+    - `%[n]a` : custom level of path depth (e.g. `%2a`)
     - `%n`: show tab number only on the active tab
     - `%N`: show always tab number
     - `%m`: modified flag
