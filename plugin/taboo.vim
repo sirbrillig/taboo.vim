@@ -201,6 +201,9 @@ function! s:expand_path(flag, tabnr, last_active_buf)
             elseif a:flag ==# "F"
                 " path relative to $HOME (if possible)
                 let path = substitute(basedir, $HOME, '~', '')
+                if path == '~'
+                    let path = path . '/'
+                endif
                 let path = path . fname
             elseif a:flag ==# "a"
                 " absolute path
