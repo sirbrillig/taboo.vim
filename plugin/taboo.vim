@@ -143,7 +143,7 @@ function! s:expand_fmt_str(tabnr, items)
                 let label .= s:expand_modified_flag(buflist)
             elseif f == "f" || f ==# "a" || match(f, "[0-9]a") == 0
                 let label .= s:expand_path(f, a:tabnr, last_active_buf)
-            elseif f == "n" " note: == performs case insensitive comparison
+            elseif f ==? "n" " note: == performs case insensitive comparison
                 let label .= s:expand_tab_number(f, a:tabnr)
             elseif f ==# "w"
                 let label .= tabpagewinnr(a:tabnr, '$')
