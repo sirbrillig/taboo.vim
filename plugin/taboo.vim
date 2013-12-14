@@ -101,7 +101,7 @@ function! s:parse_fmt_str(str)
     let i = 0
 
     while i < strlen(a:str)
-        let pos = match(a:str, "%" . '\(f\|F\|T\|\d\?a\|n\|N\|m\|w\)', i)
+        let pos = match(a:str, "%" . '\(f\|F\|T\|t\|[\d]\?a\|n\|N\|m\|w\)', i)
         if pos < 0
             call extend(tokens, split(strpart(a:str, i, strlen(a:str) - i), '\zs'))
             let i = strlen(a:str)
@@ -141,7 +141,7 @@ function! s:expand_fmt_str(tabnr, items)
             let f = strpart(i, 1) " remove the '%' charater from the string
             if f ==# "m"
                 let label .= s:expand_modified_flag(buflist)
-            elseif f == "f" || f ==# "T" || f ==# "a" || match(f, "[0-9]a") == 0
+            elseif f == "f" || f == "t" || f ==# "a" || match(f, "[0-9]a") == 0
                 let label .= s:expand_path(f, a:tabnr, last_active_buf)
             elseif f ==? "n" " note: == performs case insensitive comparison
                 let label .= s:expand_tab_number(f, a:tabnr)
@@ -180,6 +180,38 @@ function! s:expand_modified_flag(buflist)
 endfunction
 " }}}
 
+" truncate_path --------------------------------- {{{
+" To truncate a path to fit within the window width. Assumes equal width per
+" tab, which is not neccessarily the most efficient use of space.
+function! s:truncate_path(path, fname, tabnr, flag)
+  let path_tokens = split(a:path, "/")
+
+  " the total amount of characters we can fit
+  let available_chars = &columns
+
+  " the length of the rest of the format string apart from this flag
+  let remaining_format_str = substitute(g:taboo_tab_format, '%' . a:flag, '', 'g')
+  let extra_chars_per_tab = len(s:expand_fmt_str(a:tabnr, s:parse_fmt_str(remaining_format_str)))
+
+  " the available characters divided by the number of tabs minus
+  " extra characters, the length of the filename, and the pathname
+  " separators gives us the number of characters available per tab
+  let chars_per_tab = (available_chars / tabpagenr("$")) - extra_chars_per_tab - len(a:fname) - len(path_tokens) - 1
+
+  " the available characters per tab divided by the number of
+  " tokens gives us the number of available characters per token
+  let chars_per_token = (chars_per_tab / len(path_tokens))
+  if chars_per_token <# 1
+    let chars_per_token = 1
+  endif
+
+  " truncate each path token to be no larger than the number of
+  " available characters per token
+  let path_tokens = map(path_tokens, 'strpart(v:val, 0, chars_per_token)')
+  return join(path_tokens, "/") . "/" . a:fname
+endfunction
+" }}}
+
 " expand_path ----------------------------------- {{{
 function! s:expand_path(flag, tabnr, last_active_buf)
 
@@ -198,37 +230,12 @@ function! s:expand_path(flag, tabnr, last_active_buf)
             if a:flag ==# "f"
                 " just the file name
                 let path = fname
+            elseif a:flag ==# "t"
+                " truncated absolute path
+                let path = s:truncate_path(basedir, fname, a:tabnr, a:flag)
             elseif a:flag ==# "T"
-                " truncated full path
-                let path = substitute(basedir, $HOME, '~', '')
-                if path == '~'
-                    let path = path . '/'
-                endif
-                let path_tokens = split(path, "/")
-
-                " the total amount of characters we can fit
-                let available_chars = &columns
-
-                " the length of the rest of the format string apart from this token
-                let remaining_format_str = substitute(g:taboo_tab_format, '%T', '', 'g')
-                let extra_chars_per_tab = len(s:expand_fmt_str(a:tabnr, s:parse_fmt_str(remaining_format_str)))
-
-                " the available characters divided by the number of tabs minus
-                " extra characters, the length of the filename, and the pathname
-                " separators gives us the number of characters available per tab
-                let chars_per_tab = (available_chars / tabpagenr("$")) - extra_chars_per_tab - len(fname) - len(path_tokens) - 1
-
-                " the available characters per tab divided by the number of
-                " tokens gives us the number of available characters per token
-                let chars_per_path = (chars_per_tab / len(path_tokens))
-                if chars_per_path <# 1
-                  let chars_per_path = 1
-                endif
-
-                " truncate each path token to be no larger than the number of
-                " available characters per token
-                let path_tokens = map(path_tokens, 'strpart(v:val, 0, chars_per_path)')
-                let path = join(path_tokens, "/") . "/" . fname
+                " truncated relative path
+                let path = s:truncate_path(fnamemodify(bn, ':.:h'), fname, a:tabnr, a:flag)
             elseif a:flag ==# "F"
                 " path relative to $HOME (if possible)
                 let path = substitute(basedir, $HOME, '~', '')
