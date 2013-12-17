@@ -198,6 +198,18 @@ function! s:truncate_path(path, fname, tabnr, flag)
   " separators gives us the number of characters available per tab
   let chars_per_tab = (available_chars / tabpagenr("$")) - extra_chars_per_tab - len(a:fname) - len(path_tokens) - 1
 
+  " sometimes there just isn't enough space for the path
+  if chars_per_tab <# 1
+    return a:fname
+  endif
+
+  " sometimes there is no need to truncate at all
+  let full_path = a:path . "/" . a:fname
+  let chars_to_remove = len(full_path) - chars_per_tab
+  if chars_to_remove <=# 0
+    return full_path
+  endif
+
   " the available characters per tab divided by the number of
   " tokens gives us the number of available characters per token
   let chars_per_token = (chars_per_tab / len(path_tokens))
